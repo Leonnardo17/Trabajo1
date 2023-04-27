@@ -16,3 +16,5 @@ Semana del 8 de mayo
 El aula les permitirá entregar dos archivos, uno para chapín en PDF  y otro para python. PERO: Les sugerimos subir un único archivo donde encontremos el link de sus drive (con acceso permitido), para poder visualizar de forma más fácil y sin sobrecargar el uso de memoria de la plataforma educativa .    
 CHAPIN(en construcción):            
 https://drive.google.com/drive/folders/1qZkAc_Hp6zpLIb2E7GdsZ0aiGUqlD8SQ?usp=share_link
+
+https://docs.google.com/document/d/1vP4CoSZ7EMspdubhM7uGiXtw9AKkdjPyYpswAQEdcXk/edit?usp=sharing
