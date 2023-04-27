@@ -1,20 +1,27 @@
-USER = 'admin@shopping.com'
-CONTR = '12345'
+import getpass
+import os 
+USER = 'admin@shopping.com'#usuario. tipo string
+CONTR = '12345' # contraseña. tipo string
 
-user_input = ''
-contr_input = ''
-i = 3
-condicional = True
+user_input = '' #variables para validacion de usuario
+contr_input = '' #variables para validacion de contraseña
+i = 3 #variable tipo entero de la cantidad de intentos incorrectos
+condicional = True #variable tipo bool
 
-#variables para crear_locales()
+#variables tipo entero. (contadores de Rubros)
 cont_indu = 0
 cont_per = 0
 cont_comida = 0
 
-def en_contruccion ():
-    print ("en contruccion")
+def opcion_erronea ():
+    os.system('cls')
+    print("-por favor seleccione una de la opciones correctas-\n")
+
+def en_contruccion (): 
+    os.system('cls')
+    print ("-En contruccion-\n")
     
-def mostrar_max_min ():
+def mostrar_max_min (): #decision de el rubro mayor o menor
         if cont_indu < cont_per:
          if cont_indu < cont_comida:
             min_locals = cont_indu # si se dan las dos primeras entonces cont_indu es menor
@@ -48,18 +55,18 @@ def mostrar_max_min ():
             print (f"El rubro con la menor cantidad de locales es: Perfumeria y cuenta con {min_locals} locales")
     
 
-def crear_locales (): 
+def crear_locales (): #accion de crear
     aux1 = 'y'
+    global cont_indu
+    global cont_per
+    global cont_comida
     while  aux1 != 'n':
         aux2 = True
         auxru = True
-        nombre = input("ingrese el nombre del local: ")
-        ubicacion = input ("ingrese la ubicacion: ")
+        nombreLocal = input("ingrese el nombre del local: ")
+        ubicacionLocal = input ("ingrese la ubicacion: ")
         
         while auxru == True:
-            global cont_indu
-            global cont_per
-            global cont_comida
             rubro = input("escoja un rubro: indumentaria, perfumería o comida\n")
             
             match rubro :
@@ -89,7 +96,7 @@ def crear_locales ():
         
     
 
-def elecciones_op1 (opcion):
+def elecciones_op1 (opcion): #acciones del menu y validacion 1) 
     match opcion:
         case "a" : 
             crear_locales ()
@@ -101,60 +108,105 @@ def elecciones_op1 (opcion):
             en_contruccion ()
             return True
         case "d": 
-            return menu (condicional)
-        case _ : 
-            print ("tipee una de las letras correspondientes: ")
-            return True
+            os.system('cls')
+            return validacion_de_opciones (condicional)
+            
         
 
-def menu_op1 (condicional):
+def menu_op1 (condicional): # mostrar menu opcion 1)
     while condicional == True:
         print ("a) Crear locales")
         print ("b) Modificar local")
         print ("c) Eliminar local")
         print ("d) Volver")
         opcion = input("ecsriba una opcion: ")
-        condicional = elecciones_op1 (opcion)
+        if (opcion != 'a' and  opcion != 'b ' and opcion != 'c' and opcion != 'd'):
+            opcion_erronea()
+        else:
+            condicional = elecciones_op1 (opcion)
+    os.system ('cls')
     return True
 
-def elecciones (opcion):
+
+def elecciones (opcion): #acciones y validacion de input menu princial
     match opcion:
-        case  1 :  
-             menu_op1 (condicional)
+        case  '1' :  
+            menu_op1 (condicional)
              
-        case opcion if opcion> 1 and opcion < 6 : 
-             en_contruccion ()
-             return True     
-        case 0 :
+        case '2' : 
+            en_contruccion ()
+            return True
+         
+        case '3' : 
+            en_contruccion ()
+            return True
+         
+        case '4' : 
+            en_contruccion ()
+            return True
+         
+        case '5' : 
+            en_contruccion ()
+            return True
+             
+        case '0' :
             print ("saliendo del programa")
             return False
 
-def menu (condicional):
-    while (condicional == True):
+def validacion_de_opciones (condicional):
+    while condicional == True:
+        os.system ('cls')
+        menu()
+        opcion = input("ingrese un numero: ")
+        
+        if (opcion != '0' and opcion !='1' and opcion != '2' and opcion !='3' and opcion != '4' and opcion !='5'):
+            opcion_erronea()
+        else:
+            os.system('cls')
+            condicional = elecciones (opcion)
+            continue 
+    
+    return (condicional)
+
+def menu (): #print del menu principal
      print ("1. Gestion de Locales")
      print ("2. Crear cuentas de dueños")
      print ("3. Aprobar / Denegar solicitud de descuento")
      print ("4. gestión de novedades")
      print ("5. Reporte")
      print ("0. salir ")
-     opcion = int (input("ingrese un numero: "))
-     if opcion >= 0 and opcion <=5:
-         condicional = elecciones (opcion)
-         continue 
-    
-    return (condicional)
+     
 
-while(condicional == True):
-    user_input = input('Ingrese su nombre de usuario: ')
-    contr_input = input('Ingrese su contraseña: ')
-    
-    if(user_input == USER and contr_input == CONTR):
-         print('Ha iniciado sección satisfactoriamente')
-         condicional = menu (condicional)
-    elif(i > 1):
-         i = i-1
-         print('Tiene', i, 'cantidad de intentos restantes')
-    else:
-         print('Máximo de intentos permitidos alcanzado')
-         condicional = False
+
+def validarUsuario(condicional):
+    while condicional != False:
+        usr = input('Ingrese su nombre de usuario: ')
         
+        while usr != USER:
+            print('Nombre de usuario incorrecto')
+            validarUsuario(condicional)
+        
+        validarContraseña (condicional)
+    
+     
+def validarContraseña(condicional):
+    global i
+    while(condicional == True):
+        contr_input = getpass.getpass('Ingrese su contraseña: ', stream='*')
+    
+        if(contr_input == CONTR):
+            os.system('cls')
+            print('Ha iniciado sección satisfactoriamente')
+            condicional = validacion_de_opciones (condicional)
+        elif(i > 1):
+            i = i-1
+            print('Tiene', i, 'cantidad de intentos restantes')
+        else:
+            print('Máximo de intentos permitidos alcanzado')
+            condicional = False
+            exit ()
+    exit ()
+    
+        
+validarUsuario (condicional)
+
