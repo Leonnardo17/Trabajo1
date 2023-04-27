@@ -1,46 +1,54 @@
 import getpass
 import os 
-USER = 'admin@shopping.com'#usuario. tipo string
-CONTR = '12345' # contraseña. tipo string
 
-user_input = '' #variables para validacion de usuario
-contr_input = '' #variables para validacion de contraseña
-i = 3 #variable tipo entero de la cantidad de intentos incorrectos
-condicional = True #variable tipo bool
 
-#variables tipo entero. (contadores de Rubros)
-cont_indu = 0
-cont_per = 0
-cont_comida = 0
+def inicializo ():
+    global USER, CONTR, user_input, contr_input, i, condicional, cont_indu, cont_comida, cont_per
+    USER = 'admin@shopping.com'#usuario. tipo string
+    CONTR = '12345' # contraseña. tipo string
+
+    user_input = '' #variables para validacion de usuario
+    contr_input = '' #variables para validacion de contraseña
+    i = 3 #variable tipo entero de la cantidad de intentos incorrectos
+    condicional = True #variable tipo bool
+
+    #variables tipo entero. (contadores de Rubros)
+    cont_indu = 0
+    cont_per = 0
+    cont_comida = 0
 
 def validarUsuario(condicional):
     while condicional != False:
         usr = input('Ingrese su nombre de usuario: ')
         
         while usr != USER:
+            os.system('cls')
             print('Nombre de usuario incorrecto')
             validarUsuario(condicional)
         
+        os.system('cls')
         validarContraseña (condicional)
         
 def validarContraseña(condicional):
     global i
     while(condicional == True):
-        contr_input = getpass.getpass('Ingrese su contraseña: ', stream='*')
+        
+        contr_input = getpass.getpass('Ingrese su contraseña: ')
     
         if(contr_input == CONTR):
             os.system('cls')
-            print('Ha iniciado sección satisfactoriamente')
-            condicional = validacion_de_opciones (condicional)
-            print ("saliendo del programa")
+            print ("ha iniciado sesion satisfactoriamente")
+            condicional = val_opc_menu_1 (condicional)
         elif(i > 1):
             i = i-1
+            os.system ('cls')
             print('Tiene', i, 'cantidad de intentos restantes')
         else:
+            os.system('cls')
             print('Máximo de intentos permitidos alcanzado')
             condicional = False
             exit ()
-    exit ()
+    
     
 def menu (): #print del menu principal
      print ("1. Gestion de Locales")
@@ -50,15 +58,16 @@ def menu (): #print del menu principal
      print ("5. Reporte")
      print ("0. salir ")
 
-def validacion_de_opciones (condicional):
+def val_opc_menu_1 (condicional):
     while condicional == True:
-        os.system ('cls')
+        
         menu()
         opcion = input("ingrese un numero: ")
         
         if (opcion != '0' and opcion !='1' and opcion != '2' and opcion !='3' and opcion != '4' and opcion !='5'):
             opcion_erronea()
         else:
+            os.system('cls')
             condicional = elecciones (opcion)
             continue 
     
@@ -78,7 +87,7 @@ def elecciones (opcion): #acciones y validacion de input menu princial
             return True
          
         case '4' : 
-            en_contruccion ()
+            menu_op4 (condicional)
             return True
          
         case '5' : 
@@ -86,17 +95,18 @@ def elecciones (opcion): #acciones y validacion de input menu princial
             return True
              
         case '0' :
+            print ("saliendo del programa")
+            exit ()
             
-            return False
         
 def menu_op1 (condicional): # mostrar menu opcion 1)
     while condicional == True:
-        os.system('cls')
         print ("a) Crear locales")
         print ("b) Modificar local")
         print ("c) Eliminar local")
         print ("d) Volver")
         opcion = input("ecsriba una opcion: ")
+        opcion = opcion.lower()
         if (opcion != 'a' and  opcion != 'b' and opcion != 'c' and opcion != 'd'):
             opcion_erronea()
         else:
@@ -107,6 +117,7 @@ def menu_op1 (condicional): # mostrar menu opcion 1)
 def elecciones_op1 (opcion): #acciones del menu y validacion 1) 
     match opcion:
         case "a" : 
+            os.system('cls')
             crear_locales ()
             return True
         case "b" : 
@@ -117,7 +128,7 @@ def elecciones_op1 (opcion): #acciones del menu y validacion 1)
             return True
         case "d": 
             os.system('cls')
-            return validacion_de_opciones (condicional)
+            return val_opc_menu_1 (condicional)
         
 def crear_locales (): #accion de crear
     aux1 = 'y'
@@ -128,11 +139,13 @@ def crear_locales (): #accion de crear
         aux2 = True
         auxru = True
         nombreLocal = input("ingrese el nombre del local: ")
+        os.system('cls')
         ubicacionLocal = input ("ingrese la ubicacion: ")
         
         while auxru == True:
             rubro = input("escoja un rubro: indumentaria, perfumería o comida\n")
-            
+            rubro = rubro.lower()
+            os.system('cls')
             match rubro :
                 case "indumentaria" : 
                     cont_indu = cont_indu + 1
@@ -148,12 +161,12 @@ def crear_locales (): #accion de crear
                     
         while aux2 == True :           
             aux1 = input("desea crear otro local? (n/y)\n")
-            if aux1 == 'y':
+            aux1 = aux1.lower()
+            if (aux1 == 'y' or aux1 == 'n'):
                 aux2 = False 
-            elif aux1 == 'n':
-                aux2 = False
             else:
                 print ("letra incorrecta")
+        os.system('cls')
 
     mostrar_max_min ()
     return True   
@@ -191,6 +204,41 @@ def mostrar_max_min (): #decision de el rubro mayor o menor
             print (f"El rubro con la mayor cantidad de locales es: Comida y cuenta con {more_locals} locales")
             print (f"El rubro con la menor cantidad de locales es: Perfumeria y cuenta con {min_locals} locales")
 
+def menu_op4 (condicional):
+    while condicional == True:
+        print ("a) Crear novedades")
+        print ("b) Modificar novedad")
+        print ("c) Eliminar novedad")
+        print ("d) Ver reporte de novedad")
+        print ("e) Volver")
+        opcion = input("ecsriba una opcion: ")
+        opcion = opcion.lower()
+        if (opcion != 'a' and  opcion != 'b' and opcion != 'c' and opcion != 'd' and opcion != 'e'):
+            opcion_erronea()
+        else:
+         condicional = elecciones_op4 (opcion)
+         continue
+    
+
+def elecciones_op4 (opcion):
+    match opcion:
+        case "a" : 
+            en_contruccion ()
+            return True
+        case "b" : 
+            en_contruccion ()
+            return True
+        case "c" : 
+            en_contruccion ()
+            return True
+        case "d":
+            en_contruccion ()
+            return True
+        case "e": 
+            os.system('cls')
+            return val_opc_menu_1 (condicional)
+    
+
 def opcion_erronea ():
     os.system('cls')
     print("-por favor seleccione una de la opciones correctas-\n")
@@ -198,5 +246,7 @@ def opcion_erronea ():
 def en_contruccion (): 
     os.system('cls')
     print ("-En contruccion-\n")
-    
+ 
+inicializo()
+os.system('cls')    
 validarUsuario (condicional)
