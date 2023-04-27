@@ -27,9 +27,9 @@ def validarUsuario(condicional):
             validarUsuario(condicional)
         
         os.system('cls')
-        validarContraseña (condicional)
+        validarpassword (condicional)
         
-def validarContraseña(condicional):
+def validarpassword(condicional):
     global i
     while(condicional == True):
         
