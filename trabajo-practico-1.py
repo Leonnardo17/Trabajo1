@@ -1,13 +1,18 @@
 import getpass
 import os 
 
-
-def inicializo ():
-    global USER, CONTR, user_input, contr_input, i, condicional, cont_indu, cont_comida, cont_per
+def inicializo (): #declaracion de variables
+    global USER, CONTR, usr, contr_input, i, condicional, cont_indu, cont_comida, cont_per,aux1, aux2, auxru, mas_locales, menos_locales, nombreLocal, ubicacionLocal, rubroLocal
+    #Locales
+    nombreLocal = ' '
+    ubicacionLocal = ' '
+    rubroLocal = ' '
+    
+    #usuario
     USER = 'admin@shopping.com'#usuario. tipo string
     CONTR = '12345' # contraseña. tipo string
 
-    user_input = '' #variables para validacion de usuario
+    usr = '' #variables para validacion de usuario
     contr_input = '' #variables para validacion de contraseña
     i = 3 #variable tipo entero de la cantidad de intentos incorrectos
     condicional = True #variable tipo bool
@@ -16,29 +21,42 @@ def inicializo ():
     cont_indu = 0
     cont_per = 0
     cont_comida = 0
+    
+    #auxiliares usados en crear_locales ()
+    aux1 = 'y'
+    aux2 = True
+    auxru = True
+    
+    #variables para mostrar el tipo de indumentaria que es mayor o menor
+    mas_locales = ' '
+    menos_locales = ' '
+    
+    #variables locales de mostrar_max_min() para saber el orden en que colocar el mayor y menor
+    #int more_locals 
+    #int min_locals
 
-def validarUsuario(condicional):
+def validar_usuario(condicional): #ingreso y validacion de usuario, si no se coloca un usuario correcto no se puede ingresar una contra
     while condicional != False:
         usr = input('Ingrese su nombre de usuario: ')
         
         while usr != USER:
             os.system('cls')
             print('Nombre de usuario incorrecto')
-            validarUsuario(condicional)
+            validar_usuario(condicional)
         
         os.system('cls')
-        validarpassword (condicional)
+        validar_password (condicional)
         
-def validarpassword(condicional):
+def validar_password(condicional): #ingreso seguro de la contra asi como validacion
     global i
-    while(condicional == True):
+    while(condicional == True ):
         
         contr_input = getpass.getpass('Ingrese su contraseña: ')
     
         if(contr_input == CONTR):
             os.system('cls')
             print ("ha iniciado sesion satisfactoriamente")
-            condicional = val_opc_menu_1 (condicional)
+            condicional = val_opc_menu_prin (condicional)
         elif(i > 1):
             i = i-1
             os.system ('cls')
@@ -50,7 +68,7 @@ def validarpassword(condicional):
             exit ()
     
     
-def menu (): #print del menu principal
+def menu_principal (): #print del menu principal
      print ("1. Gestion de Locales")
      print ("2. Crear cuentas de dueños")
      print ("3. Aprobar / Denegar solicitud de descuento")
@@ -58,10 +76,10 @@ def menu (): #print del menu principal
      print ("5. Reporte")
      print ("0. salir ")
 
-def val_opc_menu_1 (condicional):
+def val_opc_menu_prin (condicional): #seleccion y validacion del menu pirnciopal 
     while condicional == True:
         
-        menu()
+        menu_principal()
         opcion = input("ingrese un numero: ")
         
         if (opcion != '0' and opcion !='1' and opcion != '2' and opcion !='3' and opcion != '4' and opcion !='5'):
@@ -69,7 +87,7 @@ def val_opc_menu_1 (condicional):
         else:
             os.system('cls')
             condicional = elecciones (opcion)
-            continue 
+            
     
     return (condicional)
 
@@ -87,7 +105,7 @@ def elecciones (opcion): #acciones y validacion de input menu princial
             return True
          
         case '4' : 
-            menu_op4 (condicional)
+            val_opc_menu_4 (condicional)
             return True
          
         case '5' : 
@@ -98,13 +116,15 @@ def elecciones (opcion): #acciones y validacion de input menu princial
             print ("saliendo del programa")
             exit ()
             
-        
-def menu_op1 (condicional): # mostrar menu opcion 1)
+def menu_1 (): #exhibiendo el submenu1
+    print ("a) Crear locales")
+    print ("b) Modificar local")
+    print ("c) Eliminar local")
+    print ("d) Volver")
+
+def menu_op1 (condicional): # seleccion y validacion del submenu 1
     while condicional == True:
-        print ("a) Crear locales")
-        print ("b) Modificar local")
-        print ("c) Eliminar local")
-        print ("d) Volver")
+        menu_1 ()
         opcion = input("ecsriba una opcion: ")
         opcion = opcion.lower()
         if (opcion != 'a' and  opcion != 'b' and opcion != 'c' and opcion != 'd'):
@@ -128,7 +148,7 @@ def elecciones_op1 (opcion): #acciones del menu y validacion 1)
             return True
         case "d": 
             os.system('cls')
-            return val_opc_menu_1 (condicional)
+            return val_opc_menu_prin (condicional)
         
 def crear_locales (): #accion de crear
     aux1 = 'y'
@@ -143,10 +163,10 @@ def crear_locales (): #accion de crear
         ubicacionLocal = input ("ingrese la ubicacion: ")
         
         while auxru == True:
-            rubro = input("escoja un rubro: indumentaria, perfumería o comida\n")
-            rubro = rubro.lower()
+            rubroLocal = input("escoja un rubro: indumentaria, perfumería o comida\n")
+            rubroLocal = rubroLocal.lower()    #en caso de tipear una mayuscula la transformamos a minuscula
             os.system('cls')
-            match rubro :
+            match rubroLocal :
                 case "indumentaria" : 
                     cont_indu = cont_indu + 1
                     auxru = False
@@ -160,7 +180,7 @@ def crear_locales (): #accion de crear
                     print ("rubro ivalido")
                     
         while aux2 == True :           
-            aux1 = input("desea crear otro local? (n/y)\n")
+            aux1 = input("desea crear otro local? (n/y)\n")       #preguntando si desea crear otro local
             aux1 = aux1.lower()
             if (aux1 == 'y' or aux1 == 'n'):
                 aux2 = False 
@@ -168,59 +188,61 @@ def crear_locales (): #accion de crear
                 print ("letra incorrecta")
         os.system('cls')
 
-    mostrar_max_min ()
-    return True   
+    choice_max_min ()
+    return  
 
-def mostrar_max_min (): #decision de el rubro mayor o menor
-        if cont_indu < cont_per:
+def choice_max_min (): #decision de el rubro mayor o menor
+    global mas_locales, menos_locales
+    if cont_indu < cont_per:
          if cont_indu < cont_comida:
-            min_locals = cont_indu # si se dan las dos primeras entonces cont_indu es menor
-            if cont_per > cont_comida:
-                more_locals = cont_per # y cont_per es mayor 
-                print (f"El rubro con la mayor cantidad de locales es: Perfumeria y cuenta con {more_locals} locales")
-                print (f"El rubro con la menor cantidad de locales es: Indumentaria y cuenta con {min_locals} locales")
+            menos_locales = 'indumemtaria'                       # si se dan las dos primeras entonces cont_indu es menor
+            if cont_per > cont_comida:                           # y cont_per es mayor que cont_comida entonces cont_per es el mayor
+                mas_locales = 'Perfumeria'
+                mostrar_max_min (cont_per,cont_indu)
             else:       
-                more_locals = cont_comida #sino cont_comida es menor
-                print (f"El rubro con la mayor cantidad de locales es: Comida y cuenta con {more_locals} locales")
-                print (f"El rubro con la menor cantidad de locales es: Indumentaria y cuenta con {min_locals} locales")
+                mas_locales = 'comida'                           #sino cont_comida es mayor
+                mostrar_max_min (cont_comida, cont_indu)
          else:
-            more_locals = cont_per #si no se dio la segunda entonces cont_per es mayor y cont_comida es menor
-            min_locals = cont_comida  
-            print (f"El rubro con la mayor cantidad de locales es: Perfumeria y cuenta con {more_locals} locales")
-            print (f"El rubro con la menor cantidad de locales es: Comida y cuenta con {min_locals} locales")
-        elif cont_indu > cont_comida:#si no se da la primera y cont_indu es tambien mayor a  cont cont comida entonces es mayor 
-            more_locals = cont_indu
+            mas_locales = 'Perfumeria'                           #si no se dio la segunda entonces cont_per es el mayor y cont_comida es el menor
+            menos_locales = 'comida'
+            mostrar_max_min (cont_per, cont_comida)
+    elif cont_indu > cont_comida:                                #si no se da la primera y cont_indu es tambien mayor a cont_comida entonces cont_indu es mayor 
+            mas_locales = 'Indumentaria'
             if cont_per > cont_comida:
-                min_locals = cont_comida #si cont_per  es mayor que cont_comida  entones cont_comida es el menor
-                print (f"El rubro con la mayor cantidad de locales es: Indumentaria y cuenta con {more_locals} locales")
-                print (f"El rubro con la menor cantidad de locales es: Comida y cuenta con {min_locals} locales")
+                menos_locales = 'comida'                         #si cont_per  es mayor que cont_comida  entones cont_comida es el menor
+                mostrar_max_min (cont_indu, cont_comida)
             else:
-                min_locals = cont_per  #sino es cont_per el menor
-                print (f"El rubro con la mayor cantidad de locales es: Indumentaria y cuenta con {more_locals} locales")
-                print (f"El rubro con la menor cantidad de locales es: Perfumeria y cuenta con {min_locals} locales")
-        else:
-            more_locals = cont_comida #si cont_indu es mayor que cont_per y cont_comida es mayor que cont_indu entonces cont_ comida es mayor y cont_per menor
-            min_locals = cont_per 
-            print (f"El rubro con la mayor cantidad de locales es: Comida y cuenta con {more_locals} locales")
-            print (f"El rubro con la menor cantidad de locales es: Perfumeria y cuenta con {min_locals} locales")
+                menos_locales = 'Perfumeria'                      #sino es cont_per es el menor
+                mostrar_max_min (cont_indu, cont_per)
+    else:
+            mas_locales = 'comida'                                #si cont_indu es mayor que cont_per y cont_comida es mayor que cont_indu entonces cont_ comida es mayor y cont_per menor
+            menos_locales = 'perfumeria'
+            mostrar_max_min (cont_comida, cont_per)
 
-def menu_op4 (condicional):
+def mostrar_max_min (more_locals, min_locals): #exhibiendo mayores y menores
+    print (f"El rubro con la mayor cantidad de locales es: {mas_locales} y cuenta con {more_locals} locales")
+    print (f"El rubro con la menor cantidad de locales es: {menos_locales} y cuenta con {min_locals} locales")
+
+def menu_4 (): #exhibiendo el submenu4
+    print ("a) Crear novedades")
+    print ("b) Modificar novedad")
+    print ("c) Eliminar novedad")
+    print ("d) Ver reporte de novedad")
+    print ("e) Volver")
+
+def val_opc_menu_4 (condicional): #validadando opcion del submenu4
     while condicional == True:
-        print ("a) Crear novedades")
-        print ("b) Modificar novedad")
-        print ("c) Eliminar novedad")
-        print ("d) Ver reporte de novedad")
-        print ("e) Volver")
+        menu_4 ()
         opcion = input("ecsriba una opcion: ")
         opcion = opcion.lower()
         if (opcion != 'a' and  opcion != 'b' and opcion != 'c' and opcion != 'd' and opcion != 'e'):
             opcion_erronea()
         else:
          condicional = elecciones_op4 (opcion)
-         continue
+         
     
 
-def elecciones_op4 (opcion):
+def elecciones_op4 (opcion): #acciones del sub menu 4
     match opcion:
         case "a" : 
             en_contruccion ()
@@ -236,17 +258,18 @@ def elecciones_op4 (opcion):
             return True
         case "e": 
             os.system('cls')
-            return val_opc_menu_1 (condicional)
+            return val_opc_menu_prin (condicional)
     
 
-def opcion_erronea ():
+def opcion_erronea (): #exhibiendo que la opcion tipeada fue erronea
     os.system('cls')
-    print("-por favor seleccione una de la opciones correctas-\n")
+    print(" -por favor seleccione una de la opciones correctas-\n")
 
-def en_contruccion (): 
+def en_contruccion (): #exhibiendo que la opcion seleccionada esta en construccion
     os.system('cls')
-    print ("-En contruccion-\n")
+    print (" -En contruccion-\n")
  
+#programa principal
 inicializo()
 os.system('cls')    
-validarUsuario (condicional)
+validar_usuario (condicional)
