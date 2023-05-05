@@ -2,8 +2,8 @@ import getpass
 import os 
 
 def inicializo (): #declaracion de variables
-    global USER, CONTR, usr, contr_input, i, condicional, cont_indu, cont_comida, cont_per,aux1, aux2, auxru, mas_locales, menos_locales, nombreLocal, ubicacionLocal, rubroLocal
-    #Locales
+    global USER, CONTR, usr, contr_input, i, condicional, cont_indu, cont_comida, cont_per,aux1, aux2, auxru, mas_locales, menos_locales, nombreLocal, ubicacionLocal, rubroLocal, iguales, diferente
+    #local
     nombreLocal = ' '
     ubicacionLocal = ' '
     rubroLocal = ' '
@@ -31,29 +31,24 @@ def inicializo (): #declaracion de variables
     mas_locales = ' '
     menos_locales = ' '
     
+    #variables locales de choice
+    iguales = ' '
+    diferente = ' '
+    #a = 0
+    #b = 0
+    #c = 0
+    
     #variables locales de mostrar_max_min() para saber el orden en que colocar el mayor y menor
     #int more_locals 
     #int min_locals
-
-def validar_usuario(condicional): #ingreso y validacion de usuario, si no se coloca un usuario correcto no se puede ingresar una contra
-    while condicional != False:
-        usr = input('Ingrese su nombre de usuario: ')
         
-        while usr != USER:
-            os.system('cls')
-            print('Nombre de usuario incorrecto')
-            validar_usuario(condicional)
-        
-        os.system('cls')
-        validar_password (condicional)
-        
-def validar_password(condicional): #ingreso seguro de la contra asi como validacion
+def validar_usuario(condicional): #ingreso seguro de la contra asi como validacion
     global i
     while(condicional == True ):
-        
+        usr = input('Ingrese su nombre de usuario: ')
         contr_input = getpass.getpass('Ingrese su contraseña: ')
     
-        if(contr_input == CONTR):
+        if(contr_input == CONTR and usr == USER):
             os.system('cls')
             print ("ha iniciado sesion satisfactoriamente")
             condicional = val_opc_menu_prin (condicional)
@@ -151,19 +146,27 @@ def elecciones_op1 (opcion): #acciones del menu y validacion 1)
             return val_opc_menu_prin (condicional)
         
 def crear_locales (): #accion de crear
-    aux1 = 'y'
+    aux1 = 's'
+    while  aux1 != 'n':
+        nombreLocal = input("Ingrese el nombre del local: ")
+        os.system('cls')
+        
+        ubicacionLocal = input ("Ingrese la ubicacion: ")
+        
+        suma_conts ()   
+        
+        aux1 = ask_s_n ()   
+            
+    choice_iquals (cont_indu, cont_per, cont_comida)
+    return  
+
+def suma_conts ():
     global cont_indu
     global cont_per
     global cont_comida
-    while  aux1 != 'n':
-        aux2 = True
-        auxru = True
-        nombreLocal = input("ingrese el nombre del local: ")
-        os.system('cls')
-        ubicacionLocal = input ("ingrese la ubicacion: ")
-        
-        while auxru == True:
-            rubroLocal = input("escoja un rubro: indumentaria, perfumería o comida\n")
+    auxru = True
+    while auxru == True:
+            rubroLocal = input("Escoja un rubro: indumentaria, perfumería o comida\n")
             rubroLocal = rubroLocal.lower()    #en caso de tipear una mayuscula la transformamos a minuscula
             os.system('cls')
             match rubroLocal :
@@ -179,19 +182,48 @@ def crear_locales (): #accion de crear
                 case _ :
                     print ("rubro ivalido")
                     
-        while aux2 == True :           
-            aux1 = input("desea crear otro local? (n/y)\n")       #preguntando si desea crear otro local
-            aux1 = aux1.lower()
-            if (aux1 == 'y' or aux1 == 'n'):
-                aux2 = False 
-            else:
-                print ("letra incorrecta")
-        os.system('cls')
+def ask_s_n ():
+    aux2 = True
+    while aux2 == True :           
+        aux1 = input("desea crear otro local? (s/n)\n")       #preguntando si desea crear otro local
+        aux1 = aux1.lower()
+        if (aux1 == 's' or aux1 == 'n'):                      #validando respuesta
+            aux2 = False 
+        else:
+            print ("letra incorrecta")
+    os.system('cls')
+    return aux1
+    
 
-    choice_max_min ()
-    return  
+def choice_iquals (a, b, c):
+    global iguales, diferente
+    if (a == b and a != c ):
+        iguales = 'indumentaria y perfumeria'
+        diferente = 'comida'
+        max_min_2_iguales (a,c)
+    elif (a == c and a != b ):
+        iguales = 'indumentaria y comida'
+        diferente = 'perfumeria'
+        max_min_2_iguales (a,b)
+    elif (b == c and b != a ):
+        iguales = 'perfumeria y comida'
+        diferente = 'indumentaria'
+        max_min_2_iguales (b,a)
+    elif (a == b == c):
+        print('todos los rubros tienen la misma cantidad de locales: ',a)
+    else:
+        choice_max_min_des ()
+    
+def max_min_2_iguales (iquals, dife):
+    if (iquals > dife):
+        print (f"{iguales} tienen la misma cantidad de locales: {iquals}")
+        print (f"El rubro con menor cantidad de locales es {diferente} y cuenta con: {dife} locales")
+    else:
+       print (f"el rubro con mayor contidad de locales es: {diferente} y cuenta con: {dife} locales") 
+       print (f"{iguales} son iguales y cuentan con {iquals}")
+    
 
-def choice_max_min (): #decision de el rubro mayor o menor
+def choice_max_min_des (): #decision de el rubro mayor o menor
     global mas_locales, menos_locales
     if cont_indu < cont_per:
          if cont_indu < cont_comida:
@@ -240,7 +272,6 @@ def val_opc_menu_4 (condicional): #validadando opcion del submenu4
         else:
          condicional = elecciones_op4 (opcion)
          
-    
 
 def elecciones_op4 (opcion): #acciones del sub menu 4
     match opcion:
