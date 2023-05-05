@@ -2,7 +2,8 @@ import getpass
 import os 
 
 def inicializo (): #declaracion de variables
-    global USER, CONTR, usr, contr_input, i, condicional, cont_indu, cont_comida, cont_per,aux1, aux2, auxru, mas_locales, menos_locales, nombreLocal, ubicacionLocal, rubroLocal, iguales, diferente
+    global USER, CONTR, usr, contr_input, i, condicional, cont_indu, cont_comida, cont_per,aux1, aux2, auxru
+    global mas_locales, menos_locales, nombreLocal, ubicacionLocal, rubroLocal, iguales, diferente
     #local
     nombreLocal = ' '
     ubicacionLocal = ' '
@@ -126,8 +127,7 @@ def menu_op1 (condicional): # seleccion y validacion del submenu 1
             opcion_erronea()
         else:
             condicional = elecciones_op1 (opcion)
-    os.system ('cls')
-    return True
+    
 
 def elecciones_op1 (opcion): #acciones del menu y validacion 1) 
     match opcion:
