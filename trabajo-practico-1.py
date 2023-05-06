@@ -1,9 +1,15 @@
+#integrantes:
+#Lugo santeliz Leonardo Daniel
+#Zega Juan Cruz
+#Goyenechea Álvaro 
+#Lopez Frias Facundo Manuel 
+
 import getpass
 import os 
 
 def inicializo (): #declaracion de variables
-    global USER, CONTR, usr, contr_input, i, condicional, cont_indu, cont_comida, cont_per,aux1, aux2, auxru
-    global mas_locales, menos_locales, nombreLocal, ubicacionLocal, rubroLocal, iguales, diferente
+    global USER, CONTR, usr, contr_input, i, condicional, cont_indu, cont_comida, cont_per,aux1, aux2
+    global mas_locales, menos_locales, nombreLocal, ubicacionLocal, rubroLocal, iguales, diferente, auxru
     #local
     nombreLocal = ' '
     ubicacionLocal = ' '
