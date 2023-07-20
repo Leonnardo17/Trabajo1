@@ -67,7 +67,6 @@ def validar_usuario(condicional):  # ingreso seguro de la contra asi como valida
             os.system("cls")
             print("Máximo de intentos permitidos alcanzado")
             condicional = False
-            exit()
 
 
 def menu_principal():  # print del menu principal
@@ -84,14 +83,7 @@ def val_opc_menu_prin(condicional):  # seleccion y validacion del menu pirnciopa
         menu_principal()
         opcion = input("ingrese un numero: ")
 
-        if (
-            opcion != "0"
-            and opcion != "1"
-            and opcion != "2"
-            and opcion != "3"
-            and opcion != "4"
-            and opcion != "5"
-        ):
+        if (opcion != "0" and opcion != "1" and opcion != "2" and opcion != "3" and opcion != "4" and opcion != "5"):
             opcion_erronea()
         else:
             os.system("cls")
@@ -180,9 +172,7 @@ def suma_conts():
     auxru = True
     while auxru == True:
         rubroLocal = input("Escoja un rubro: indumentaria, perfumería o comida\n")
-        rubroLocal = (
-            rubroLocal.lower()
-        )  # en caso de tipear una mayuscula la transformamos a minuscula
+        rubroLocal = (rubroLocal.lower())  # en caso de tipear una mayuscula la transformamos a minuscula
         os.system("cls")
         match rubroLocal:
             case "indumentaria":
@@ -201,9 +191,7 @@ def suma_conts():
 def ask_continue():
     aux2 = True
     while aux2 == True:
-        aux1 = input(
-            "desea crear otro local? (s/n)\n"
-        )  # preguntando si desea crear otro local
+        aux1 = input("desea crear otro local? (s/n)\n")  # preguntando si desea crear otro local
         aux1 = aux1.lower()
         if aux1 == "s" or aux1 == "n":  # validando respuesta
             aux2 = False
@@ -250,9 +238,7 @@ def choice_max_min_des():  # decision de el rubro mayor o menor
     global mas_locales, menos_locales
     if cont_indu < cont_per:
         if cont_indu < cont_comida:
-            menos_locales = (
-                "indumemtaria"  # si se dan las dos primeras entonces cont_indu es menor
-            )
+            menos_locales = ("indumemtaria")  # si se dan las dos primeras entonces cont_indu es menor
             if (
                 cont_per > cont_comida
             ):  # y cont_per es mayor que cont_comida entonces cont_per es el mayor
@@ -303,13 +289,7 @@ def val_opc_menu_4(condicional):  # validadando opcion del submenu4
         menu_4()
         opcion = input("ecsriba una opcion: ")
         opcion = opcion.lower()
-        if (
-            opcion != "a"
-            and opcion != "b"
-            and opcion != "c"
-            and opcion != "d"
-            and opcion != "e"
-        ):
+        if (opcion != "a" and opcion != "b" and opcion != "c" and opcion != "d" and opcion != "e"):
             opcion_erronea()
         else:
             condicional = elecciones_op4(opcion)
