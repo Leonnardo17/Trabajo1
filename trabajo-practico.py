@@ -12,11 +12,21 @@ import os
 # local
 nombreLocal = " "
 ubicacionLocal = " "
-rubroLocal = " "
+rubroLocal = " " 
 
-# usuario
-USER = "admin@shopping.com"  # usuario. tipo string
-CONTR = "12345"  # contraseña. tipo string
+# registro 
+INT = [0]
+STRING = [""]
+
+COD = INT * 100
+USER = STRING * 100
+CLAVE = STRING * 100
+TIPO = STRING * 100
+
+BASE = [COD, USER, CLAVE, TIPO]
+
+#USER = "admin@shopping.com"  # usuario. tipo string
+#CONTR = "12345"  # contraseña. tipo string
 
 usr = ""  # variables para validacion de usuario
 contr_input = ""  # variables para validacion de contraseña
@@ -48,17 +58,30 @@ diferente = " "
 # int more_locals
 # int min_locals
 
+#tipos owners
+type_1 = "administrador"
+type_2 = "dueñoLocal"
+type_3 = "cliente"
+
 
 def validar_usuario(condicional):  # ingreso seguro de la contra asi como validacion
     global i
     while condicional == True:
         usr = input("Ingrese su nombre de usuario: ")
+        usr_aprob= busqueda(usr)
         contr_input = getpass.getpass("Ingrese su contraseña: ")
+        contr_aprob, num_fila = busqueda(contr_input)
 
-        if contr_input == CONTR and usr == USER:
+        if usr_aprob != False and contr_aprob != False:
             os.system("cls")
             print("ha iniciado sesion satisfactoriamente")
-            condicional = val_opc_menu_prin(condicional)
+            if BASE[3][num_fila] == type_1:
+                condicional = val_menu_admin(condicional)
+            elif BASE[3][num_fila] == type_2:
+                condicional = val_menu_owner(condicional)
+            else:
+                condicional = val_menu_client(condicional)
+            
         elif i > 1:
             i = i - 1
             os.system("cls")
@@ -69,31 +92,87 @@ def validar_usuario(condicional):  # ingreso seguro de la contra asi como valida
             condicional = False
 
 
-def menu_principal():  # print del menu principal
-    print("1. Gestion de Locales")
-    print("2. Crear cuentas de dueños")
-    print("3. Aprobar / Denegar solicitud de descuento")
-    print("4. gestión de novedades")
-    print("5. Reporte")
-    print("0. salir ")
+# def menu_principal():  # print del menu de administrador
+#     print("1. Gestion de Locales")
+#     print("2. Crear cuentas de dueños")
+#     print("3. Aprobar / Denegar solicitud de descuento")
+#     print("4. gestión de novedades")
+#     print("5. Reporte de utilización de descuentos")
+#     print("0. salir ")
+
+def menu_prin_client():
+    print ("1. Registrarme")
+    print ("2. Buscar descuentos en locales")
+    print ("3. Solicitar descuento")
+    print ("4. Ver novedades")
+    print ("0. Salir")
+
+def menu_prin_admin():
+    print ("1. Gestión de locales")
+    print ("2. Crear cuentas de dueños de locales")
+    print ("3. Aprobar / Denegar solicitud de descuento")
+    print ("4. Gestión de Novedades")
+    print ("5. Reporte de utilización de descuentos")
+    print ("0. Salir")
+    
+def menu_prin_owner():
+    print ("1. Gestión de Descuentos")
+    print ("2. Aceptar / Rechazar pedido de descuento")
+    print ("3. Reporte de uso de descuentos")
+    print ("0. Salir")
 
 
-def val_opc_menu_prin(condicional):  # seleccion y validacion del menu pirnciopal
+def val_menu_client(condicional):
     while condicional == True:
-        menu_principal()
+        menu_prin_client()
+        opcion = input("ingrese un numero: ")
+
+        if (opcion != "0" and opcion != "1" and opcion != "2" and opcion != "3" and opcion != "4" ):
+            opcion_erronea()
+        else:
+            os.system("cls")
+            condicional = elecciones_client(opcion)
+
+def elecciones_client(opcion):
+      match opcion:
+        case "1":
+            en_contruccion()
+            return True
+
+        case "2":
+            en_contruccion()
+            return True
+
+        case "3":
+            en_contruccion()
+            return True
+
+        case "4":
+            en_contruccion()
+            return True
+
+        case "0":
+            print("saliendo del programa")
+            return False
+
+
+def val_menu_admin(condicional):
+    while condicional == True:
+        menu_prin_admin()
         opcion = input("ingrese un numero: ")
 
         if (opcion != "0" and opcion != "1" and opcion != "2" and opcion != "3" and opcion != "4" and opcion != "5"):
             opcion_erronea()
         else:
             os.system("cls")
-            condicional = elecciones(opcion)
+            condicional = elecciones_admin(opcion)
 
 
-def elecciones(opcion):  # acciones y validacion de input menu princial
-    match opcion:
+def elecciones_admin(opcion):
+      match opcion:
         case "1":
             menu_op1(condicional)
+            return True
 
         case "2":
             en_contruccion()
@@ -106,8 +185,36 @@ def elecciones(opcion):  # acciones y validacion de input menu princial
         case "4":
             val_opc_menu_4(condicional)
             return True
-
         case "5":
+            en_contruccion
+            return True
+        case "0":
+            print("saliendo del programa")
+            return False
+
+
+def val_menu_owner(condicional):
+    while condicional == True:
+        menu_prin_owner()
+        opcion = input("ingrese un numero: ")
+
+        if (opcion != "0" and opcion != "1" and opcion != "2" and opcion != "3"):
+            opcion_erronea()
+        else:
+            os.system("cls")
+            condicional = elecciones_owner(opcion)
+
+def elecciones_owner(opcion):
+      match opcion:
+        case "1":
+            en_contruccion()
+            return True
+
+        case "2":
+            en_contruccion()
+            return True
+
+        case "3":
             en_contruccion()
             return True
 
@@ -116,11 +223,51 @@ def elecciones(opcion):  # acciones y validacion de input menu princial
             return False
 
 
-def menu_1():  # exhibiendo el submenu1
+
+# def val_opc_menu_prin(condicional):  # seleccion y validacion del menu pirnciopal
+#     while condicional == True:
+#         menu_principal()
+#         opcion = input("ingrese un numero: ")
+
+#         if (opcion != "0" and opcion != "1" and opcion != "2" and opcion != "3" and opcion != "4" and opcion != "5"):
+#             opcion_erronea()
+#         else:
+#             os.system("cls")
+#             condicional = elecciones(opcion)
+
+
+# def elecciones(opcion):  # acciones y validacion de input menu princial
+#     match opcion:
+#         case "1":
+#             menu_op1(condicional)
+
+#         case "2":
+#             en_contruccion()
+#             return True
+
+#         case "3":
+#             en_contruccion()
+#             return True
+
+#         case "4":
+#             val_opc_menu_4(condicional)
+#             return True
+
+#         case "5":
+#             en_contruccion()
+#             return True
+
+#         case "0":
+#             print("saliendo del programa")
+#             return False
+
+
+def menu_1():  #submenu_gestion_locales
     print("a) Crear locales")
     print("b) Modificar local")
     print("c) Eliminar local")
-    print("d) Volver")
+    print("d) Mapa de locales")
+    print("e) Volver")
 
 
 def menu_op1(condicional):  # seleccion y validacion del submenu 1
@@ -147,14 +294,16 @@ def elecciones_op1(opcion):  # acciones del menu y validacion 1)
             en_contruccion()
             return True
         case "d":
+            en_contruccion #por hacer
+        case "e":
             os.system("cls")
-            return val_opc_menu_prin(condicional)
+            return val_menu_admin(condicional)
 
 
 def crear_locales():  # accion de crear
     nombreLocal = " "
     while nombreLocal != "*":
-        print("---- ingresundo un ' * ' se termina el ingreso de locales ----")
+        print("---- ingresando un ' * ' se termina el ingreso de locales ----")
         nombreLocal = input("Ingrese el nombre del local: ")
         os.system("cls")
         if nombreLocal != "*":
@@ -268,7 +417,7 @@ def mostrar_max_min(more_locals, min_locals):  # exhibiendo mayores y menores
     print(f"El rubro con la menor cantidad de locales es: {menos_locales} y cuenta con {min_locals} locales")
 
 
-def menu_4():  # exhibiendo el submenu4
+def menu_4():  #submenu_gestion_novedades
     print("a) Crear novedades")
     print("b) Modificar novedad")
     print("c) Eliminar novedad")
@@ -315,7 +464,59 @@ def en_contruccion():  # exhibiendo que la opcion seleccionada esta en construcc
     os.system("cls")
     print(" -En contruccion-\n")
 
+def precarga():
+    # Primer usuario
+
+    COD[0] = 1
+    USER[0] = "admin@shopping.com"
+    CLAVE[0] =  "12345"
+    TIPO [0] = type_1
+
+    # Segundo usuario
+
+    COD[1] = 4
+    USER[1] = "localA@shopping.com"
+    CLAVE[1]=  "AAAA1111"
+    TIPO [1]= type_2
+
+    # Tercer usuario
+
+    COD[2] = 6
+    USER[2] = "localB@shopping.com"
+    CLAVE[2] =  "BBBB2222"
+    TIPO [2] = type_2
+
+    # Cuarto usuario
+
+    COD[3] = 9
+    USER[3] = "unCliente@shopping.com"
+    CLAVE[3] =  "33xx33"
+    TIPO [3] = type_3
+
+def submenu_descuentos():
+    print("a) Crear descuento para mi local")
+    print("b) Modificar descuento de mi local")
+    print("c) Eliminar descuento de mi local")
+    print("d) Volver")
+
+
+            
+def busqueda(dato):
+    fila = 0
+    condicional = False
+    while condicional != True and fila <= 99:
+        column = 0
+        while condicional != True and column <= 3:
+            if dato == BASE[column][fila]:
+                condicional = True
+            else:
+                column += 1
+        fila += 1
+    return condicional, fila-1
+        
+
 
 # programa principal
 os.system("cls")
+precarga()
 validar_usuario(condicional)
