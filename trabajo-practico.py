@@ -224,13 +224,9 @@ def choice_iquals(a, b, c):
 def max_min_2_iguales(iquals, dife):
     if iquals > dife:
         print(f"{iguales} tienen la misma cantidad de locales: {iquals}")
-        print(
-            f"El rubro con menor cantidad de locales es {diferente} y cuenta con: {dife} locales"
-        )
+        print(f"El rubro con menor cantidad de locales es {diferente} y cuenta con: {dife} locales")
     else:
-        print(
-            f"el rubro con mayor contidad de locales es: {diferente} y cuenta con: {dife} locales"
-        )
+        print(f"el rubro con mayor contidad de locales es: {diferente} y cuenta con: {dife} locales")
         print(f"{iguales} son iguales y cuentan con {iquals}")
 
 
@@ -268,12 +264,8 @@ def choice_max_min_des():  # decision de el rubro mayor o menor
 
 
 def mostrar_max_min(more_locals, min_locals):  # exhibiendo mayores y menores
-    print(
-        f"El rubro con la mayor cantidad de locales es: {mas_locales} y cuenta con {more_locals} locales"
-    )
-    print(
-        f"El rubro con la menor cantidad de locales es: {menos_locales} y cuenta con {min_locals} locales"
-    )
+    print(f"El rubro con la mayor cantidad de locales es: {mas_locales} y cuenta con {more_locals} locales")
+    print(f"El rubro con la menor cantidad de locales es: {menos_locales} y cuenta con {min_locals} locales")
 
 
 def menu_4():  # exhibiendo el submenu4
