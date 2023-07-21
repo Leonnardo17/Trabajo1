@@ -14,19 +14,30 @@ nombreLocal = " "
 ubicacionLocal = " "
 rubroLocal = " " 
 
-# registro 
-INT = [0]
+ENTERO = [0]
 STRING = [""]
 
-COD = INT * 100
-USER = STRING * 100
-CLAVE = STRING * 100
-TIPO = STRING * 100
+# Usuarios 
+COD = ENTERO * 101
+USER = STRING * 101
+CLAVE = STRING * 101
+TIPO = STRING * 101
 
-BASE = [COD, USER, CLAVE, TIPO]
+usuarios = [COD, USER, CLAVE, TIPO]
+LIM_USERS_RAW = 100
+LIM_USERS_COL = 3
 
-#USER = "admin@shopping.com"  # usuario. tipo string
-#CONTR = "12345"  # contraseña. tipo string
+#Locales
+COD_LOCAL = ENTERO * 51
+NOMBRE_LOCAL = STRING * 51
+UBICACION_LOCAL = STRING * 51
+COD_USUARIO = ENTERO * 51
+ESTADO = STRING * 51
+RUBRO = STRING * 51
+
+locales = [COD_LOCAL, NOMBRE_LOCAL, UBICACION_LOCAL, RUBRO, COD_USUARIO, ESTADO]
+LIM_LOCALS_ROW = 50
+LIM_LOCALS_COL = 5
 
 usr = ""  # variables para validacion de usuario
 contr_input = ""  # variables para validacion de contraseña
@@ -58,26 +69,25 @@ diferente = " "
 # int more_locals
 # int min_locals
 
-#tipos owners
-type_1 = "administrador"
-type_2 = "dueñoLocal"
-type_3 = "cliente"
+#tipos de usuarios y locales
+tipos_user = ["administrador", "dueñoLocal", "cliente"]
+tipo_local = ["indumentaria", "perfumeria", "comida"]
 
 
 def validar_usuario(condicional):  # ingreso seguro de la contra asi como validacion
     global i
     while condicional == True:
         usr = input("Ingrese su nombre de usuario: ")
-        usr_aprob= busqueda(usr)
+        usr_aprob= busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL,usr)
         contr_input = getpass.getpass("Ingrese su contraseña: ")
-        contr_aprob, num_fila = busqueda(contr_input)
+        contr_aprob, num_fila = busqueda(usuarios , LIM_USERS_RAW, LIM_USERS_COL, contr_input)
 
         if usr_aprob != False and contr_aprob != False:
             os.system("cls")
             print("ha iniciado sesion satisfactoriamente")
-            if BASE[3][num_fila] == type_1:                   #decidion del menu segun el tipo de usuario
+            if usuarios[3][num_fila] == tipos_user[0]:                   #decidion del menu segun el tipo de usuario
                 condicional = val_menu_admin(condicional)
-            elif BASE[3][num_fila] == type_2:
+            elif usuarios[3][num_fila] == tipos_user[1]:
                 condicional = val_menu_owner(condicional)
             else:
                 condicional = val_menu_client(condicional)
@@ -243,7 +253,7 @@ def elecciones_op1(opcion):  # acciones del menu y validacion 1)
             en_contruccion()
             return True
         case "d":
-            return val_menu_owner(condicional) #por hacer
+            return False #por hacer
 
 
 def menu_1():  #submenu_gestion_locales
@@ -281,22 +291,79 @@ def elecciones_op1(opcion):  # acciones del menu y validacion 1)
             en_contruccion() #por hacer
         case "e":
             os.system("cls")
-            return val_menu_admin(condicional)
+            return False
 
 
 def crear_locales():  # accion de crear
     nombreLocal = " "
+    
     while nombreLocal != "*":
+        column = 1
+        
+        for i in range(0,50):
+            print("\n")
+            for j in range(0,6):
+                    print(locales[j][i],"       " ,end='')
+                    
         print("---- ingresando un ' * ' se termina el ingreso de locales ----")
         nombreLocal = input("Ingrese el nombre del local: ")
+        aprob, fila = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL, nombreLocal)
+        if aprob != True and nombreLocal != "*":
+            locales[column][fila] = nombreLocal
+            aprob = True
+            while aprob != False :
+                os.system("cls")
+                ubicacionLocal = input("Ingrese la ubicacion: ")
+                aprob, x = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL,nombreLocal)
+                if aprob != True:
+                    column += 1
+                    locales[column][fila] = ubicacionLocal
+                    column += 1
+                else:
+                    os.system("cls")
+                    repetido("La direcion")
+                ingreso_rubro (column, fila)
+                column += 1
+                aprob, x = ingreso_codigos(column, fila)
+        else:
+            repetido("el nombre")
         os.system("cls")
-        if nombreLocal != "*":
-            ubicacionLocal = input("Ingrese la ubicacion: ")
-
-            suma_conts()
+        #suma_conts()
     choice_iquals(cont_indu, cont_per, cont_comida)
     return
 
+
+def ingreso_rubro(column, fila):
+    aux = False
+    while aux != True:
+        rubroLocal = input("Escoja un rubro: indumentaria, perfumería o comida\n")
+        rubroLocal = (rubroLocal.lower())  # en caso de tipear una mayuscula la transformamos a minuscula
+        aux = busqueda_uni(tipo_local, 3, rubroLocal, aux)
+        os.system("cls")
+        if aux != False:
+            locales[column][fila] = rubroLocal
+        else:
+            
+            print("rubro ivalido")
+        
+
+def ingreso_codigos (column, fila):
+    cont = 0
+    
+    while cont != 1:
+        cod_owner = int(input("ingrese el codigo: "))
+        aux , x= busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL, cod_owner)
+        if aux == True:
+            locales[column][fila] = cod_owner
+            cont += 1
+        else:
+            os.system("cls")
+            print("Codigo Invalido!!!!")
+    locales[0][fila] = fila
+    column += 1
+    locales[column][fila] = "A"
+    return False
+    
 
 def suma_conts():
     global cont_indu
@@ -368,9 +435,7 @@ def choice_max_min_des():  # decision de el rubro mayor o menor
     if cont_indu < cont_per:
         if cont_indu < cont_comida:
             menos_locales = ("indumemtaria")  # si se dan las dos primeras entonces cont_indu es menor
-            if (
-                cont_per > cont_comida
-            ):  # y cont_per es mayor que cont_comida entonces cont_per es el mayor
+            if (cont_per > cont_comida):  # y cont_per es mayor que cont_comida entonces cont_per es el mayor
                 mas_locales = "Perfumeria"
                 mostrar_max_min(cont_per, cont_indu)
             else:
@@ -380,9 +445,7 @@ def choice_max_min_des():  # decision de el rubro mayor o menor
             mas_locales = "Perfumeria"  # si no se dio la segunda entonces cont_per es el mayor y cont_comida es el menor
             menos_locales = "comida"
             mostrar_max_min(cont_per, cont_comida)
-    elif (
-        cont_indu > cont_comida
-    ):  # si no se da la primera y cont_indu es tambien mayor a cont_comida entonces cont_indu es mayor
+    elif (cont_indu > cont_comida):  # si no se da la primera y cont_indu es tambien mayor a cont_comida entonces cont_indu es mayor
         mas_locales = "Indumentaria"
         if cont_per > cont_comida:
             menos_locales = "comida"  # si cont_per  es mayor que cont_comida  entones cont_comida es el menor
@@ -447,51 +510,50 @@ def opcion_erronea():  # exhibiendo que la opcion tipeada fue erronea
 def en_contruccion():  # exhibiendo que la opcion seleccionada esta en construccion
     os.system("cls")
     print(" -En contruccion-\n")
+    
+def repetido(x):
+    os.system("cls")
+    print (f" -{x} que intenta ingresar ya se encuentra guardado- \n")
 
 def precarga():
-    # Primer usuario
-
-    COD[0] = 1
-    USER[0] = "admin@shopping.com"
-    CLAVE[0] =  "12345"
-    TIPO [0] = type_1
-
-    # Segundo usuario
-
-    COD[1] = 4
-    USER[1] = "localA@shopping.com"
-    CLAVE[1]=  "AAAA1111"
-    TIPO [1]= type_2
-
-    # Tercer usuario
-
-    COD[2] = 6
-    USER[2] = "localB@shopping.com"
-    CLAVE[2] =  "BBBB2222"
-    TIPO [2] = type_2
-
-    # Cuarto usuario
-
-    COD[3] = 9
-    USER[3] = "unCliente@shopping.com"
-    CLAVE[3] =  "33xx33"
-    TIPO [3] = type_3
-
+    users = ["codigo","Usuario","Clave","Tipo", 1,"admin@shopping.com", "12345", tipos_user[0], 4,"localA@shopping.com", "AAAA1111", tipos_user[1], 6, "localB@shopping.com","BBBB2222", tipos_user[1], 9, "unCliente@shopping.com", "33xx33",tipos_user[2]]
+    encabezado = ["Codigo del local", "nombre", "Ubicacion", "Rubro", "Codigo del usuario", "Estado"]
+    cont = 0
+    #precargando usuarios
+    for i in range(0,5):
+        for j in range(0,4):
+            usuarios[j][i] = users[cont]
+            cont += 1
             
-def busqueda(dato): #busqueda secuencial bidimensional
+    #precarga encabezado de locales
+    for i in range (0,6):
+        locales[i][0] = encabezado[i]
+             
+def busqueda(dato,limraw, limcolumn, dato_buscar): #busqueda secuencial bidimensional
     fila = 0
     condicional = False
-    while condicional != True and fila <= 99:
+    while condicional != True and fila <= limraw :
         column = 0
-        while condicional != True and column <= 3:
-            if dato == BASE[column][fila]:
-                condicional = True
+        while condicional != True and column <= limcolumn:
+            if dato_buscar == dato[column][fila]:
+                return True, fila
+            
+            elif dato[0][fila] == 0:
+                return False, fila
+            
             else:
                 column += 1
         fila += 1
-    return condicional, fila-1
+    return False, fila-1
         
-
+def busqueda_uni (buscar, lim,buscado, aux):
+    for i in range(0, lim):
+        if buscar [i] == buscado:
+            aux = True
+    return aux
+            
+    
+    
 
 # programa principal
 os.system("cls")
