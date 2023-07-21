@@ -49,6 +49,7 @@ cont_indu = 0
 cont_per = 0
 cont_comida = 0
 
+
 # auxiliares usados en crear_locales ()
 aux1 = "y"
 aux2 = True
@@ -324,12 +325,14 @@ def crear_locales():  # accion de crear
                     repetido("La direcion")
                 ingreso_rubro (column, fila)
                 column += 1
-                aprob, x = ingreso_codigos(column, fila)
+                aprob = ingreso_codigos(column, fila)
         else:
             repetido("el nombre")
         os.system("cls")
         #suma_conts()
-    choice_iquals(cont_indu, cont_per, cont_comida)
+    #choice_iquals(cont_indu, cont_per, cont_comida)
+    contador_rubro()
+    
     return
 
 
@@ -345,25 +348,61 @@ def ingreso_rubro(column, fila):
         else:
             
             print("rubro ivalido")
+def contador_rubro ():
+    global cont_comida, cont_per, cont_indu
+    tipos = [""] * 3
+    cont_indu = contador(locales,0)
+    cont_per= contador(locales, 1)
+    cont_comida= contador(locales, 2)
+    
+    contador_max_min = [cont_indu, cont_per, cont_comida]
+    
+    contador_max_min = max_min_arrays(contador_max_min)
+    
+    for i in range(0,3):
+        if contador_max_min[i] == cont_indu:
+            tipos[i] = tipo_local[0]
+        elif contador_max_min[i] == cont_per:
+            tipos[i] = tipo_local[1]
+        elif contador_max_min[i] == cont_comida:
+            tipos[i] = tipo_local[2]
+    
+    print(f"rubro con mayor cantidad de locales ({tipos[0]}): {contador_max_min[0]}")
+    print(f"rubro con cantidad intermedia de locales ({tipos[1]}): {contador_max_min[1]}")
+    print(f"rubro con mayor cantidad de locales ({tipos[2]}): {contador_max_min[2]}")
         
+
+
+def max_min_arrays(dato):
+    for i in range (0,2):
+        if dato[i] < dato[i+1]:
+            aux = dato[i]
+            dato[i] = dato[i+1]
+            dato[i+1]= aux
+    return dato
 
 def ingreso_codigos (column, fila):
     cont = 0
     
     while cont != 1:
-        cod_owner = int(input("ingrese el codigo: "))
-        aux , x= busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL, cod_owner)
-        if aux == True:
-            locales[column][fila] = cod_owner
-            cont += 1
-        else:
+        try:
+            cod_owner = int(input("ingrese el codigo: "))
+            aux , x = busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL, cod_owner)
+            if aux == True:
+                locales[column][fila] = cod_owner
+                cont += 1
+            else:
+                os.system("cls")
+                print("Codigo Invalido!!!!")
+        except:
             os.system("cls")
             print("Codigo Invalido!!!!")
+        
     locales[0][fila] = fila
     column += 1
     locales[column][fila] = "A"
     return False
-    
+              
 
 def suma_conts():
     global cont_indu
@@ -552,7 +591,18 @@ def busqueda_uni (buscar, lim,buscado, aux):
             aux = True
     return aux
             
-    
+def contador (dato, type):
+    fila = 0
+    cont = 0
+    condicional = False
+    while condicional != True and fila <= LIM_LOCALS_ROW :
+        
+        if  dato[3][fila] == tipo_local[type]:
+            cont += 1
+            
+            
+        fila += 1
+    return cont
     
 
 # programa principal
