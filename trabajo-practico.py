@@ -289,7 +289,8 @@ def elecciones_op1(opcion):  # acciones del menu y validacion 1)
             en_contruccion()
             return True
         case "d":
-            en_contruccion() #por hacer
+            en_contruccion()
+            return True #por hacer
         case "e":
             os.system("cls")
             return False
@@ -299,13 +300,7 @@ def crear_locales():  # accion de crear
     nombreLocal = " "
     
     while nombreLocal != "*":
-        column = 1
-        
-        for i in range(0,50):
-            print("\n")
-            for j in range(0,6):
-                    print(locales[j][i],"       " ,end='')
-                    
+        column = 1  
         print("---- ingresando un ' * ' se termina el ingreso de locales ----")
         nombreLocal = input("Ingrese el nombre del local: ")
         aprob, fila = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL, nombreLocal)
@@ -329,14 +324,13 @@ def crear_locales():  # accion de crear
         else:
             repetido("el nombre")
         os.system("cls")
-        #suma_conts()
-    #choice_iquals(cont_indu, cont_per, cont_comida)
     contador_rubro()
     
     return
 
 
 def ingreso_rubro(column, fila):
+    os.system("cls")
     aux = False
     while aux != True:
         rubroLocal = input("Escoja un rubro: indumentaria, perfumería o comida\n")
@@ -348,9 +342,9 @@ def ingreso_rubro(column, fila):
         else:
             
             print("rubro ivalido")
+            
 def contador_rubro ():
     global cont_comida, cont_per, cont_indu
-    tipos = [""] * 3
     cont_indu = contador(locales,0)
     cont_per= contador(locales, 1)
     cont_comida= contador(locales, 2)
@@ -359,20 +353,31 @@ def contador_rubro ():
     
     contador_max_min = max_min_arrays(contador_max_min)
     
+    if cont_indu != cont_per and cont_comida != cont_per and cont_comida != cont_indu:
+        diferentes(contador_max_min)
+    elif cont_indu == cont_comida and cont_per == cont_comida and cont_indu == cont_per:
+        for i in range(0,3):
+            print(f"Cantidad de locales de {tipo_local[i]}: {contador_max_min[i]}")
+        print("-----  -----")
+    else:
+        choice_iquals()
+
+def diferentes(contador_max_min):
+    global cont_comida, cont_per, cont_indu
+    tipos = [""] * 3
     for i in range(0,3):
+            
         if contador_max_min[i] == cont_indu:
             tipos[i] = tipo_local[0]
         elif contador_max_min[i] == cont_per:
             tipos[i] = tipo_local[1]
         elif contador_max_min[i] == cont_comida:
             tipos[i] = tipo_local[2]
+            
+    for i in range(0,3):
+        print(f"Cantidad de locales de {tipos[i]}: {contador_max_min[i]}")
+    print("-----  -----")
     
-    print(f"rubro con mayor cantidad de locales ({tipos[0]}): {contador_max_min[0]}")
-    print(f"rubro con cantidad intermedia de locales ({tipos[1]}): {contador_max_min[1]}")
-    print(f"rubro con mayor cantidad de locales ({tipos[2]}): {contador_max_min[2]}")
-        
-
-
 def max_min_arrays(dato):
     for i in range (0,2):
         if dato[i] < dato[i+1]:
@@ -404,27 +409,27 @@ def ingreso_codigos (column, fila):
     return False
               
 
-def suma_conts():
-    global cont_indu
-    global cont_per
-    global cont_comida
-    auxru = True
-    while auxru == True:
-        rubroLocal = input("Escoja un rubro: indumentaria, perfumería o comida\n")
-        rubroLocal = (rubroLocal.lower())  # en caso de tipear una mayuscula la transformamos a minuscula
-        os.system("cls")
-        match rubroLocal:
-            case "indumentaria":
-                cont_indu = cont_indu + 1
-                auxru = False
-            case "perfumeria":
-                cont_per = cont_per + 1
-                auxru = False
-            case "comida":
-                cont_comida = cont_comida + 1
-                auxru = False
-            case _:
-                print("rubro ivalido")
+# def suma_conts():
+#     global cont_indu
+#     global cont_per
+#     global cont_comida
+#     auxru = True
+#     while auxru == True:
+#         rubroLocal = input("Escoja un rubro: indumentaria, perfumería o comida\n")
+#         rubroLocal = (rubroLocal.lower())  # en caso de tipear una mayuscula la transformamos a minuscula
+#         os.system("cls")
+#         match rubroLocal:
+#             case "indumentaria":
+#                 cont_indu = cont_indu + 1
+#                 auxru = False
+#             case "perfumeria":
+#                 cont_per = cont_per + 1
+#                 auxru = False
+#             case "comida":
+#                 cont_comida = cont_comida + 1
+#                 auxru = False
+#             case _:
+#                 print("rubro ivalido")
 
 
 def ask_continue():
@@ -440,67 +445,67 @@ def ask_continue():
     return aux1
 
 
-def choice_iquals(a, b, c):
-    global iguales, diferente
-    if a == b and a != c:
-        iguales = "indumentaria y perfumeria"
+def choice_iquals():
+    global cont_indu, cont_per, cont_comida
+    if cont_indu == cont_per and cont_indu != cont_comida:
+        iguales = ["indumentaria", "perfumeria"]
         diferente = "comida"
-        max_min_2_iguales(a, c)
-    elif a == c and a != b:
-        iguales = "indumentaria y comida"
+        max_min_2_iguales(cont_indu, cont_comida, iguales, diferente)
+    elif cont_indu == cont_comida and cont_indu != cont_per:
+        iguales = ["indumentaria","comida"]
         diferente = "perfumeria"
-        max_min_2_iguales(a, b)
-    elif b == c and b != a:
-        iguales = "perfumeria y comida"
+        max_min_2_iguales(cont_indu, cont_per, iguales, diferente)
+    elif cont_per == cont_comida and cont_per != cont_indu:
+        iguales = ["perfumeria","comida"]
         diferente = "indumentaria"
-        max_min_2_iguales(b, a)
-    elif a == b == c:
-        print("todos los rubros tienen la misma cantidad de locales: ", a)
-    else:
-        choice_max_min_des()
+        max_min_2_iguales(cont_per, cont_indu, iguales, diferente)
 
 
-def max_min_2_iguales(iquals, dife):
+def max_min_2_iguales(iquals, dife, iguales, diferente):
     if iquals > dife:
-        print(f"{iguales} tienen la misma cantidad de locales: {iquals}")
-        print(f"El rubro con menor cantidad de locales es {diferente} y cuenta con: {dife} locales")
+        print(f"Cantidad de locales de {iguales[0]}: {iquals}")
+        print(f"Cantidad de locales de {iguales[1]}: {iquals}")
+        print(f"Cantidad de locales de {diferente}: {dife}")
+        print("-----  -----")
     else:
-        print(f"el rubro con mayor contidad de locales es: {diferente} y cuenta con: {dife} locales")
-        print(f"{iguales} son iguales y cuentan con {iquals}")
+        print(f"Cantidad de locales de {diferente}: {dife}")
+        print(f"Cantidad de locales de {iguales[0]}: {iquals}")
+        print(f"Cantidad de locales de {iguales[1]}: {iquals}\n")
+        print("-----  -----")
 
 
-def choice_max_min_des():  # decision de el rubro mayor o menor
-    global mas_locales, menos_locales
-    if cont_indu < cont_per:
-        if cont_indu < cont_comida:
-            menos_locales = ("indumemtaria")  # si se dan las dos primeras entonces cont_indu es menor
-            if (cont_per > cont_comida):  # y cont_per es mayor que cont_comida entonces cont_per es el mayor
-                mas_locales = "Perfumeria"
-                mostrar_max_min(cont_per, cont_indu)
-            else:
-                mas_locales = "comida"  # sino cont_comida es mayor
-                mostrar_max_min(cont_comida, cont_indu)
-        else:
-            mas_locales = "Perfumeria"  # si no se dio la segunda entonces cont_per es el mayor y cont_comida es el menor
-            menos_locales = "comida"
-            mostrar_max_min(cont_per, cont_comida)
-    elif (cont_indu > cont_comida):  # si no se da la primera y cont_indu es tambien mayor a cont_comida entonces cont_indu es mayor
-        mas_locales = "Indumentaria"
-        if cont_per > cont_comida:
-            menos_locales = "comida"  # si cont_per  es mayor que cont_comida  entones cont_comida es el menor
-            mostrar_max_min(cont_indu, cont_comida)
-        else:
-            menos_locales = "Perfumeria"  # sino es cont_per es el menor
-            mostrar_max_min(cont_indu, cont_per)
-    else:
-        mas_locales = "comida"  # si cont_indu es mayor que cont_per y cont_comida es mayor que cont_indu entonces cont_ comida es mayor y cont_per menor
-        menos_locales = "perfumeria"
-        mostrar_max_min(cont_comida, cont_per)
+# def choice_max_min_des():  # decision de el rubro mayor o menor
+#     global mas_locales, menos_locales
+#     if cont_indu < cont_per:
+#         if cont_indu < cont_comida:
+#             menos_locales = ("indumemtaria")  # si se dan las dos primeras entonces cont_indu es menor
+#             if (cont_per > cont_comida):  # y cont_per es mayor que cont_comida entonces cont_per es el mayor
+#                 mas_locales = "Perfumeria"
+#                 mostrar_max_min(cont_per, cont_indu)
+#             else:
+#                 mas_locales = "comida"  # sino cont_comida es mayor
+#                 mostrar_max_min(cont_comida, cont_indu)
+#         else:
+#             mas_locales = "Perfumeria"  # si no se dio la segunda entonces cont_per es el mayor y cont_comida es el menor
+#             menos_locales = "comida"
+#             mostrar_max_min(cont_per, cont_comida)
+#     elif (cont_indu > cont_comida):  # si no se da la primera y cont_indu es tambien mayor a cont_comida entonces cont_indu es mayor
+#         mas_locales = "Indumentaria"
+#         if cont_per > cont_comida:
+#             menos_locales = "comida"  # si cont_per  es mayor que cont_comida  entones cont_comida es el menor
+#             mostrar_max_min(cont_indu, cont_comida)
+#         else:
+#             menos_locales = "Perfumeria"  # sino es cont_per es el menor
+#             mostrar_max_min(cont_indu, cont_per)
+#     else:
+#         mas_locales = "comida"  # si cont_indu es mayor que cont_per y cont_comida es mayor que cont_indu entonces cont_ comida es mayor y cont_per menor
+#         menos_locales = "perfumeria"
+#         mostrar_max_min(cont_comida, cont_per)
 
 
-def mostrar_max_min(more_locals, min_locals):  # exhibiendo mayores y menores
-    print(f"El rubro con la mayor cantidad de locales es: {mas_locales} y cuenta con {more_locals} locales")
-    print(f"El rubro con la menor cantidad de locales es: {menos_locales} y cuenta con {min_locals} locales")
+# def mostrar_max_min(more_locals, min_locals):  # exhibiendo mayores y menores
+#     print(f"El rubro con la mayor cantidad de locales es: {mas_locales} y cuenta con {more_locals} locales")
+#     print(f"El rubro con la menor cantidad de locales es: {menos_locales} y cuenta con {min_locals} locales")
 
 
 def menu_4():  #submenu_gestion_novedades
