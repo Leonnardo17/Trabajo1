@@ -40,7 +40,7 @@ locales = [COD_LOCAL, NOMBRE_LOCAL, UBICACION_LOCAL, RUBRO, COD_USUARIO, ESTADO]
 LIM_LOCALS_ROW = 50
 LIM_LOCALS_COL = 5
 
-locales_ordenados = locales
+
 
 usr = ""  # variables para validacion de usuario
 contr_input = ""  # variables para validacion de contraseña
@@ -77,9 +77,9 @@ def validar_usuario(condicional):  # ingreso seguro de la contra asi como valida
     global i
     while condicional == True:
         usr = input("Ingrese su nombre de usuario: ")
-        usr_aprob= busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL,usr)
+        usr_aprob= busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL,usr) #comprobando existenci de usuario
         contr_input = getpass.getpass("Ingrese su contraseña: ")
-        contr_aprob, num_fila = busqueda(usuarios , LIM_USERS_RAW, LIM_USERS_COL, contr_input)
+        contr_aprob, num_fila = busqueda(usuarios , LIM_USERS_RAW, LIM_USERS_COL, contr_input) #comprobando existencia de contrasenia
 
         if usr_aprob != False and contr_aprob != False:
             os.system("cls")
@@ -134,7 +134,7 @@ def val_menu_client(condicional): #validacion de opciones del menu para clientes
             os.system("cls")
             condicional = elecciones_client(opcion)
 
-def elecciones_client(opcion):
+def elecciones_client(opcion):  #elecciones del cliente (por construir)
       match opcion:
         case "1":
             en_contruccion()
@@ -169,7 +169,7 @@ def val_menu_admin(condicional): #validacion de opciones del menu para administr
             condicional = elecciones_admin(opcion)
 
 
-def elecciones_admin(opcion):
+def elecciones_admin(opcion): #elecciones del menu de administrador
       match opcion:
         case "1":
             menu_op1(condicional)
@@ -205,7 +205,7 @@ def val_menu_owner(condicional): #validacion de opciones del menu para duenos
             os.system("cls")
             condicional = elecciones_owner(opcion)
 
-def elecciones_owner(opcion):
+def elecciones_owner(opcion): #elecciones para el menu de duenos (por construir)
       match opcion:
         case "1":
             menu_gestion(condicional)
@@ -223,7 +223,7 @@ def elecciones_owner(opcion):
             print("saliendo del programa")
             return False
 
-def gestion_descuentos ():
+def gestion_descuentos (): #submenu de una sesion de duenos
     print ("a) Crear descuento para mi local")
     print ("b) Modificar descuento de mi local")
     print ("c) Eliminar descuento de mi local")
@@ -240,7 +240,7 @@ def menu_gestion (condicional):  # seleccion y validacion del submenu 1
             condicional = elecciones_op1(opcion)
 
 
-def elecciones_op1(opcion):  # acciones del menu y validacion 1)
+def elecciones_op1(opcion):  # acciones del submenu de duenos
     match opcion:
         case "a":
             en_contruccion()
@@ -354,7 +354,8 @@ def crear_locales():  # accion de crear
                             ingreso_rubro (column, fila)                                                #ingreso del tipo de rubro
                             column += 1
                             aprob = ingreso_codigos(column, fila)                                       #ingreso de codigo del dueno y asignacion del codigo de local
-                            max_locales += 1  
+                            max_locales += 1 
+                            ordenar() #ordenando array de locales por orden alfabetico 
                         else:
                             os.system("cls")
                             print("Caracter no permitido\n")
@@ -368,8 +369,8 @@ def crear_locales():  # accion de crear
         print ("maxima cantidad de locales alcanzada\n")
         
     os.system("cls")
+    
     contador_rubro()  #eleccion de cantidad de rubros
-    ordenar() #ordenando array de locales por orden alfabetico
     
     return
 
@@ -390,54 +391,52 @@ def ingreso_rubro(column, fila): #ingreso de rubro
             
 def contador_rubro ():
     global cont_comida, cont_per, cont_indu
-    cont_indu = contador(locales,0)  #contando la cantidad de rubros de indumentaria
-    cont_per = contador(locales, 1)  #contando la cantidad de rubros de perfumeria
-    cont_comida = contador(locales, 2) #contando la cantidad de rubros de comida
     
     contador_max_min = [cont_indu, cont_per, cont_comida] #adiganando los contadores a un array
+    for i in range(0,3):
+        contador_max_min[i] = contador(i)
     
-    contador_max_min = max_min_arrays(contador_max_min) #organizandolos de mayor a menor
+    contador_max_min, tipos = max_min_arrays(contador_max_min, tipo_local) #organizandolos de mayor a menor
+    contador_max_min, tipos = max_min_arrays(contador_max_min, tipo_local) #al ser 3 variables se puede dar el caso que se necesite doble iteracion
     
-    if cont_indu != cont_per and cont_indu != cont_comida and cont_per != cont_comida:  #elecciones para print en panatalla, iguales, diferentes y dos iguales, respectivamente
-        diferentes(contador_max_min)
-    elif cont_indu == cont_comida and cont_per == cont_comida and cont_indu == cont_per:
-        for i in range(0,3):
-            print(f"Cantidad de locales de {tipo_local[i]}: {contador_max_min[i]}")
-        print("-----  -----")
-    else:
-        choice_iquals()
+    for i in range(0,3):
+            print(f"Cantidad de locales de {tipos[i]}: {contador_max_min[i]}") #print de cantidad de locales al terminar carga de locales
+    print("---------  ----------")
+    
+def contador (type): #contador utilizado para la cantidad de locales 
+    fila = 1
+    cont = 0
+    while fila <= max_locales :
+        
+        if  locales[3][fila] == tipo_local[type]:
+            cont += 1
+            
+            
+        fila += 1
+    return cont
 
-def diferentes(contador_max_min):
-    global cont_comida, cont_per, cont_indu
-    tipos = [""] * 3
-    for i in range(0,3):
-            
-        if contador_max_min[i] == cont_indu:
-            tipos[i] = tipo_local[0]
-        elif contador_max_min[i] == cont_per:
-            tipos[i] = tipo_local[1]
-        elif contador_max_min[i] == cont_comida:
-            tipos[i] = tipo_local[2]
-            
-    for i in range(0,3):
-        print(f"Cantidad de locales de {tipos[i]}: {contador_max_min[i]}")
-    print("-----  -----")
-    
-def max_min_arrays(dato):
+def max_min_arrays(dato, tipo): #funcion encargada de  ordenar el array que contiene los contadores de mayor a menor (necesita ser usada dos veces consecutivas)
     for i in range (0,2):
         if dato[i] < dato[i+1]:
+            
             aux = dato[i]
             dato[i] = dato[i+1]
             dato[i+1]= aux
-    return dato
+            
+            aux = tipo[i]
+            tipo[i] = tipo[i+1]
+            tipo[i+1]= aux
+        
+            
+    return dato, tipo
 
-def ingreso_codigos (column, fila):
+def ingreso_codigos (column, fila):   #ingreso de los codigos y el estado
     cont = 0
     
     while cont != 1:
-        try:
-            cod_owner = int(input("ingrese el codigo: "))
-            aux , x = busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL, cod_owner)
+        try:                                                                       #excepcion usada para evitar que el operador colo que una caracter de tipo char,                                          
+            cod_owner = int(input("ingrese el codigo: "))                          #pues daria error al intentador lo hacer entero 
+            aux , x = busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL, cod_owner)  #considero necesaria aplicarla dado que es necesario hacer el input entero para poder compararlo con algun codigo exitente
             if aux == True and cod_owner != 0:
                 locales[column][fila] = cod_owner
                 cont += 1
@@ -448,9 +447,9 @@ def ingreso_codigos (column, fila):
             os.system("cls")
             print("Codigo Invalido!!!!")
         
-    locales[0][fila] = fila
-    column += 1
-    locales[column][fila] = "A"
+    locales[0][fila] = max_locales + 1   #en este punto se termina los input y se determia el codigo de local
+    column += 1             
+    locales[column][fila] = "A"          #y se le asigna una 'A' para su estado de activo 
     os.system("cls")
     return False
               
@@ -465,36 +464,6 @@ def ask_continue():
             print("letra incorrecta")
     os.system("cls")
     return aux1
-
-
-def choice_iquals():
-    global cont_indu, cont_per, cont_comida
-    if cont_indu == cont_per and cont_indu != cont_comida:
-        iguales = ["indumentaria", "perfumeria"]
-        diferente = "comida"
-        max_min_2_iguales(cont_indu, cont_comida, iguales, diferente)
-    elif cont_indu == cont_comida and cont_indu != cont_per:
-        iguales = ["indumentaria","comida"]
-        diferente = "perfumeria"
-        max_min_2_iguales(cont_indu, cont_per, iguales, diferente)
-    elif cont_per == cont_comida and cont_per != cont_indu:
-        iguales = ["perfumeria","comida"]
-        diferente = "indumentaria"
-        max_min_2_iguales(cont_per, cont_indu, iguales, diferente)
-
-
-def max_min_2_iguales(iquals, dife, iguales, diferente):
-    if iquals > dife:
-        print(f"Cantidad de locales de {iguales[0]}: {iquals}")
-        print(f"Cantidad de locales de {iguales[1]}: {iquals}")
-        print(f"Cantidad de locales de {diferente}: {dife}")
-        print("-----  -----")
-    else:
-        print(f"Cantidad de locales de {diferente}: {dife}")
-        print(f"Cantidad de locales de {iguales[0]}: {iquals}")
-        print(f"Cantidad de locales de {iguales[1]}: {iquals}\n")
-        print("-----  -----")
-
 
 def menu_4():  #submenu_gestion_novedades
     print("a) Crear novedades")
@@ -515,7 +484,7 @@ def val_opc_menu_4(condicional):  # validadando opcion del submenu4
             condicional = elecciones_op4(opcion)
 
 
-def elecciones_op4(opcion):  # acciones del sub menu 4
+def elecciones_op4(opcion):  # acciones del sub menu 4 del perfil de administrador
     match opcion:
         case "a":
             en_contruccion()
@@ -547,7 +516,7 @@ def repetido(x):
     os.system("cls")
     print (f" -{x} que intenta ingresar ya se encuentra guardado- \n")
 
-def precarga():
+def precarga(): #precarga de los datos de las cuentas
     users = ["codigo","Usuario","Clave","Tipo", 1,"admin@shopping.com", "12345", tipos_user[0], 4,"localA@shopping.com", "AAAA1111", tipos_user[1], 6, "localB@shopping.com","BBBB2222", tipos_user[1], 9, "unCliente@shopping.com", "33xx33",tipos_user[2]]
     encabezado = ["Codigo del local", "nombre", "Ubicacion", "Rubro", "Codigo del usuario", "Estado"]
     cont = 0
@@ -578,62 +547,63 @@ def busqueda(dato,limraw, limcolumn, dato_buscar): #busqueda secuencial bidimens
         fila += 1
     return False, fila-1
         
-def busqueda_uni (buscar, lim,buscado, aux):
+def busqueda_uni (buscar, lim,buscado, aux): #busqueda unidimensional
     for i in range(0, lim):
         if buscar [i] == buscado:
             aux = True
     return aux
             
-def contador (dato, type):
-    fila = 0
-    cont = 0
-    condicional = False
-    while condicional != True and fila <= LIM_LOCALS_ROW :
-        
-        if  dato[3][fila] == tipo_local[type]:
-            cont += 1
-            
-            
-        fila += 1
-    return cont
+# def busq_dico()
 
-def ordenar():
-    locales_ordenados = locales
+
+def ordenar():  #funcion encargada de ordenar el array locales
     if max_locales > 1:
         for i in range(1,max_locales):
                 
-                first_character_1 = locales_ordenados [1][i]
-                first_character_1 =  (first_character_1[0])
+                first_character_1 = locales [1][i]          #se obtine la primera letra de una posicion en la columna de los nombres del array locales y se guarda en una variable
+                first_character_1 =  first_character_1[0]
                 
-                first_character_2 = locales_ordenados [1][i+1]
+                first_character_2 = locales [1][i+1]        #luego se hace lo mismo con la posicion siguiente
                 first_character_2 = first_character_2[0]
         
                 if first_character_1 > first_character_2:
-                    for j in range(0,LIM_LOCALS_COL+1):
-                        aux = locales_ordenados[j][i]
-                        locales_ordenados[j][i] = locales_ordenados[j][i+1]
-                        locales_ordenados[j][i+1] = aux
+                    for j in range(0,LIM_LOCALS_COL+1):     #si la primera es mayor (ASCII)  que la segunda se intercambian 
+                        aux = locales[j][i]
+                        locales[j][i] = locales[j][i+1]
+                        locales[j][i+1] = aux
+                        
+                elif first_character_1 == first_character_2: #si son iguales se compara la segunda letra
+                    second_character_1 = locales [1][i]
+                    second_character_1 =  second_character_1[1]
+                
+                    second_character_2 = locales [1][i+1]
+                    second_character_2 = second_character_2[1]
+                    if second_character_1 > second_character_2:  #y si esta segunda letra es mayor en el primer nombre se intercambian
+                        for j in range(0,LIM_LOCALS_COL+1):
+                            aux = locales[j][i]
+                            locales[j][i] = locales[j][i+1]
+                            locales[j][i+1] = aux
     return
         
-def ver_locales():
+def ver_locales():  #print en pantalla de la tabla de locales 
     if max_locales != 0:
         print ("Presione culaquier tecla para continuar\n")
         for i in range(0,LIM_LOCALS_ROW):
-            if locales_ordenados[0][i] != 0:
+            if locales[0][i] != 0:
                 print("")
                 for j in range(0,LIM_LOCALS_COL+1):
                     if j == 3:
-                        x = 20 - len(str(locales_ordenados[j][i]))
+                        x = 20 - len(str(locales[j][i]))
                         spaces = " " * x
-                        print (locales_ordenados[j][i].capitalize(),spaces, end="")
+                        print (locales[j][i].capitalize(),spaces, end="")
                     else:
-                        x = 20 - len(str(locales_ordenados[j][i]))
+                        x = 20 - len(str(locales[j][i]))
                         spaces = " " * x
-                        print (locales_ordenados[j][i].capitalize(),spaces, end="")
-        msvcrt.getch()
+                        print (locales[j][i],spaces, end="")
+        msvcrt.getch() #esta funcion pausa el sistema hasta que el operador tipee cualquier letra
         os.system("cls")
     else:
-        print ("-- no se ha ingresado ningun local al sistema ---\n")
+        print ("-- no se ha ingresado ningun local al sistema ---\n")  #este aviso aparece cuando no se ha introdido ningun local
         print ("presione cualquier tecla para continuar\n")
         msvcrt.getch()
         os.system("cls")
