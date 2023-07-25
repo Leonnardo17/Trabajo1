@@ -324,9 +324,9 @@ def crear_locales():  # accion de crear
                 aprob, fila = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL, nombreLocal) #busqueda fila vacia en donde escribir el nombre
                 if aprob != True and nombreLocal != "*":
                     locales[column][fila] = nombreLocal                                      #guardando el nombre
-                    aprob = True
+                    column += 1
                     
-                    while aprob != False :
+                    while column < 3 :
                         
                         special = False
                         os.system("cls")
@@ -342,23 +342,23 @@ def crear_locales():  # accion de crear
                                 special = True
                                 
                         if special != True:
-                            aprob, x = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL,nombreLocal)     #buqueda de fila vacia
-                            if aprob != True:
-                                column += 1
+                            aprob, x = busqueda(locales, max_locales, LIM_LOCALS_COL,nombreLocal)
+                                                                                              #buqueda de fila vacia
+                            if aprob == False:
                                 locales[column][fila] = ubicacionLocal                                   #guardando ubicacion
                                 column += 1
                             else:
                                 os.system("cls")
                                 repetido("La direcion")
-                                
-                            ingreso_rubro (column, fila)                                                #ingreso del tipo de rubro
-                            column += 1
-                            aprob = ingreso_codigos(column, fila)                                       #ingreso de codigo del dueno y asignacion del codigo de local
-                            max_locales += 1 
-                            ordenar() #ordenando array de locales por orden alfabetico 
                         else:
                             os.system("cls")
                             print("Caracter no permitido\n")
+                            
+                    ingreso_rubro (column, fila)                                                #ingreso del tipo de rubro
+                    column += 1
+                    aprob = ingreso_codigos(column, fila)                                       #ingreso de codigo del dueno y asignacion del codigo de local
+                    max_locales += 1 
+                    ordenar() #ordenando array de locales por orden alfabetico 
                 else:
                     repetido("el nombre")
             else:
@@ -397,7 +397,6 @@ def contador_rubro ():
         contador_max_min[i] = contador(i)
     
     contador_max_min, tipos = max_min_arrays(contador_max_min, tipo_local) #organizandolos de mayor a menor
-    contador_max_min, tipos = max_min_arrays(contador_max_min, tipo_local) #al ser 3 variables se puede dar el caso que se necesite doble iteracion
     
     for i in range(0,3):
             print(f"Cantidad de locales de {tipos[i]}: {contador_max_min[i]}") #print de cantidad de locales al terminar carga de locales
@@ -416,16 +415,17 @@ def contador (type): #contador utilizado para la cantidad de locales
     return cont
 
 def max_min_arrays(dato, tipo): #funcion encargada de  ordenar el array que contiene los contadores de mayor a menor (necesita ser usada dos veces consecutivas)
-    for i in range (0,2):
-        if dato[i] < dato[i+1]:
+    for j in range(0,3):
+        for i in range (0,2):
+            if dato[i] < dato[i+1]:
             
-            aux = dato[i]
-            dato[i] = dato[i+1]
-            dato[i+1]= aux
+                aux = dato[i]
+                dato[i] = dato[i+1]
+                dato[i+1]= aux
             
-            aux = tipo[i]
-            tipo[i] = tipo[i+1]
-            tipo[i+1]= aux
+                aux = tipo[i]
+                tipo[i] = tipo[i+1]
+                tipo[i+1]= aux
         
             
     return dato, tipo
@@ -437,7 +437,7 @@ def ingreso_codigos (column, fila):   #ingreso de los codigos y el estado
         try:                                                                       #excepcion usada para evitar que el operador colo que una caracter de tipo char,                                          
             cod_owner = int(input("ingrese el codigo: "))                          #pues daria error al intentador lo hacer entero 
             aux , x = busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL, cod_owner)  #considero necesaria aplicarla dado que es necesario hacer el input entero para poder compararlo con algun codigo exitente
-            if aux == True and cod_owner != 0:
+            if aux == True and usuarios[3][x] == tipos_user[1]:
                 locales[column][fila] = cod_owner
                 cont += 1
             else:
@@ -537,15 +537,11 @@ def busqueda(dato,limraw, limcolumn, dato_buscar): #busqueda secuencial bidimens
         column = 0
         while condicional != True and column <= limcolumn:
             if dato_buscar == dato[column][fila]:
-                return True, fila
-            
-            elif dato[0][fila] == 0:
-                return False, fila
-            
+               condicional = True
             else:
                 column += 1
         fila += 1
-    return False, fila-1
+    return condicional, fila-1
         
 def busqueda_uni (buscar, lim,buscado, aux): #busqueda unidimensional
     for i in range(0, lim):
@@ -592,13 +588,11 @@ def ver_locales():  #print en pantalla de la tabla de locales
             if locales[0][i] != 0:
                 print("")
                 for j in range(0,LIM_LOCALS_COL+1):
+                    x = 20 - len(str(locales[j][i]))
+                    spaces = " " * x
                     if j == 3:
-                        x = 20 - len(str(locales[j][i]))
-                        spaces = " " * x
                         print (locales[j][i].capitalize(),spaces, end="")
                     else:
-                        x = 20 - len(str(locales[j][i]))
-                        spaces = " " * x
                         print (locales[j][i],spaces, end="")
         msvcrt.getch() #esta funcion pausa el sistema hasta que el operador tipee cualquier letra
         os.system("cls")
