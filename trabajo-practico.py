@@ -77,10 +77,11 @@ def validar_usuario(condicional):  # ingreso seguro de la contra asi como valida
     global i
     while condicional == True:
         usr = input("Ingrese su nombre de usuario: ")
-        usr_aprob= busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL,usr) #comprobando existenci de usuario
+        usr_aprob = busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL,usr, 'codi') #comprobando existenci de usuario
+        
         contr_input = getpass.getpass("Ingrese su contraseña: ")
-        contr_aprob, num_fila = busqueda(usuarios , LIM_USERS_RAW, LIM_USERS_COL, contr_input) #comprobando existencia de contrasenia
-
+        contr_aprob = busqueda(usuarios , LIM_USERS_RAW, LIM_USERS_COL, contr_input, 'condi') #comprobando existencia de contrasenia
+        num_fila = busqueda(usuarios , LIM_USERS_RAW, LIM_USERS_COL, contr_input, 'fila')
         if usr_aprob != False and contr_aprob != False:
             os.system("cls")
             print("ha iniciado sesion satisfactoriamente")
@@ -281,7 +282,7 @@ def elecciones_op1(opcion):  # acciones del menu y validacion 1)
             crear_locales()
             return True
         case "b":
-            en_contruccion()
+            modificar ()
             return True
         case "c":
             en_contruccion()
@@ -309,11 +310,13 @@ def crear_locales():  # accion de crear
             if nombreLocal != '*':
                 fila = max_locales + 1
                 column += 1
-                ingreso_ubi()
+                ingreso_ubi(column, fila)
                 column += 1
                 ingreso_rubro (column, fila)
                 column += 1
                 ingreso_codigos(column, fila)
+                column += 1
+                asignar_codigo_active (fila,column)
                 max_locales += 1
                 ordenar()
     else:
@@ -324,137 +327,54 @@ def crear_locales():  # accion de crear
     
     contador_rubro()
     return
-            
-            # special= False
-            # column = 1                                                                  #ingreso del nombre del local
-            # print("---- ingresando un ' * ' se termina el ingreso de locales ----\n")
-            # nombreLocal = (input("Ingrese el nombre del local: ")).capitalize()
-            
-    
-            # for i in range(0,len(nombreLocal)):
-            #     verifi = nombreLocal[i]                                                 #verificando si tienes caracteres validos
-            #     verifi = verifi.upper()
-            #     if i == 0:
-            #         if verifi == " " or verifi == " " or verifi == "'" or verifi == "&":
-            #             special = True
-            #     if ((verifi < "A" and verifi > "Z") or (verifi < "0" and verifi > "9")) and not(verifi != " " or verifi != "'" or verifi !="&" or verifi != "." ):
-            #         special = True
-            
-
-            # if special != True:       
-            #     aprob, fila = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL, nombreLocal) #busqueda fila vacia en donde escribir el nombre
-            #     if aprob != True and nombreLocal != "*":
-            #         locales[column][fila] = nombreLocal                                      #guardando el nombre
-            #         column += 1
-                    
-                    # while column < 3 :
-                        
-                    #     special = False
-                    #     os.system("cls")
-                    #     ubicacionLocal = (input("Ingrese la ubicacion: ")).capitalize()                     #ingreso de ubicacion
-                        
-                    #     for i in range(0,len(ubicacionLocal)):
-                    #         verifi = ubicacionLocal[i]
-                    #         verifi = verifi.upper()
-                    #         if i == 0:
-                    #             if verifi == " " or verifi == " " or verifi == "'" or verifi == "&":     #verificando si tiene caracteres especiales
-                    #                 special = True
-                    #         if ((verifi < "A" and verifi > "Z") or (verifi < "0" and verifi > "9")) and not(verifi != " " or verifi != "'" or verifi !="&" or verifi != "." ):
-                    #             special = True
-                                
-                    #     if special != True:
-                    #         aprob, x = busqueda(locales, max_locales, LIM_LOCALS_COL,nombreLocal)
-                    #                                                                           #buqueda de fila vacia
-                    #         if aprob == False:
-                    #             locales[column][fila] = ubicacionLocal                                   #guardando ubicacion
-                    #             column += 1
-                    #         else:
-                    #             os.system("cls")
-                    #             repetido("La direcion")
-                    #     else:
-                    #         os.system("cls")
-                    #         print("Caracter no permitido\n")
-                            
-    #                 ingreso_rubro (column, fila)                                                #ingreso del tipo de rubro
-    #                 column += 1
-    #                 aprob = ingreso_codigos(column, fila)                                       #ingreso de codigo del dueno y asignacion del codigo de local
-    #                 max_locales += 1 
-    #                 ordenar() #ordenando array de locales por orden alfabetico 
-    #             else:
-    #                 repetido("el nombre")
-    #         else:
-    #             os.system("cls")
-    #             print("Caracter no permitido\n")
-    # else:
-    #     os.system("cls")
-    #     print ("maxima cantidad de locales alcanzada\n")
-        
-    # os.system("cls")
-    
-    # contador_rubro()  #eleccion de cantidad de rubros
-    
-    # return
 
 def ingreso_nombre ():
     cont = 0
     nombreLocal = " "
     while cont != 1 and nombreLocal != "*":
-        
-        special= False                                                                #ingreso del nombre del local
+                                                            #ingreso del nombre del local
         print("---- ingresando un ' * ' se termina el ingreso de locales ----\n")
         nombreLocal = (input("Ingrese el nombre del local: ")).capitalize()
-            
-    
-        for i in range(0,len(nombreLocal)):
-            verifi = nombreLocal[i]                                                 #verificando si tienes caracteres validos
-            verifi = verifi.upper()
-            if i == 0:
-                if verifi == " " or verifi == " " or verifi == "'" or verifi == "&":
-                    special = True
-            if ((verifi < "A" and verifi > "Z") or (verifi < "0" and verifi > "9")) and not(verifi != " " or verifi != "'" or verifi !="&" or verifi != "." ):
-                    special = True
         
-        if special != True:       
-                aprob, fila = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL, nombreLocal) #busqueda fila vacia en donde escribir el nombre
-                if aprob != True and nombreLocal != "*":
-                    locales[1][fila] = nombreLocal
-                    cont+= 1#guardando el nombre
-                else:
-                    repetido("el nombre")
-        else:
+        if len(nombreLocal) > 2:   
+            special = char_allow(nombreLocal)
+        
+            if special != True:       
+                    aprob = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL, nombreLocal, 'condi') #busqueda fila vacia en donde escribir el nombre
+                    fila = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL, nombreLocal, 'fila')
+                    if aprob != True:
+                        locales[1][fila] = nombreLocal
+                        cont+= 1#guardando el nombre
+                    else:
+                        repetido("el nombre")
+            else:
+                os.system("cls")
+                print("Caracter no permitido\n")
+        elif nombreLocal != '*':
             os.system("cls")
-            print("Caracter no permitido\n")
+            print ("---- minimo de caracteres permitidos: 3 ----")
     
     return nombreLocal
 
 
-def ingreso_ubi ():
+def ingreso_ubi (column, fila):
     cont = 0
+    os.system("cls")
     while cont != 1:             
-        special = False
-        os.system("cls")
         ubicacionLocal = (input("Ingrese la ubicacion: ")).capitalize()                     #ingreso de ubicacion
-                        
-        for i in range(0,len(ubicacionLocal)):
-            verifi = ubicacionLocal[i]
-            verifi = verifi.upper()
-            if i == 0:
-                if verifi == " " or verifi == " " or verifi == "'" or verifi == "&":     #verificando si tiene caracteres especiales
-                        special = True
-            if ((verifi < "A" and verifi > "Z") or (verifi < "0" and verifi > "9")) and not(verifi != " " or verifi != "'" or verifi !="&" or verifi != "." ):
-                special = True
-                                
-        if special != True:
-            aprob, x = busqueda(locales, max_locales, LIM_LOCALS_COL,nombreLocal)                                                                                #buqueda de fila vacia
-            if aprob == False:
-                locales[2][x+1] = ubicacionLocal                                   #guardando ubicacion
+        
+        if len(ubicacionLocal) > 3: 
+            special = char_allow(ubicacionLocal)              
+                              
+            if special != True:
+                locales[column][fila] = ubicacionLocal                                   #guardando ubicacion
                 cont += 1
             else:
                 os.system("cls")
-                repetido("La direcion")
+                print("Caracter no permitido\n")
         else:
             os.system("cls")
-            print("Caracter no permitido\n")
+            print("---- minimo de caracteres permitidos: 4 ---- ")
 
 
 
@@ -497,7 +417,7 @@ def contador (type): #contador utilizado para la cantidad de locales
         fila += 1
     return cont
 
-def max_min_arrays(dato, tipo): #funcion encargada de  ordenar el array que contiene los contadores de mayor a menor (necesita ser usada dos veces consecutivas)
+def max_min_arrays(dato, tipo):                     #funcion encargada de  ordenar el array que contiene los contadores de mayor a menor (necesita ser usada dos veces consecutivas)
     for j in range(0,3):
         for i in range (0,2):
             if dato[i] < dato[i+1]:
@@ -516,13 +436,14 @@ def max_min_arrays(dato, tipo): #funcion encargada de  ordenar el array que cont
 def ingreso_codigos (column, fila):   #ingreso de los codigos y el estado
     cont = 0
     
-    while cont != 1:                                                                   #excepcion usada para evitar que el operador colo que una caracter de tipo char,                                          
+    while cont != 1:                                                                                                           
         cod_owner = input("ingrese el codigo: ")
-        aprob = verif_num(cod_owner)                                            #pues daria error al intentador lo hacer entero 
-        if aprob != True:
+        aprob = verif_num(cod_owner)                 #verificando si en el numero es numero para cuando se intente pasar de str a int no de error (logramos descartar el try que teniamos antes)                                                 
+        if aprob != False:
             cod_owner = int(cod_owner)
-            aux , x = busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL, cod_owner)  #considero necesaria aplicarla dado que es necesario hacer el input entero para poder compararlo con algun codigo exitente
-            if aux == True and usuarios[3][x] == tipos_user[1]:
+            aux = busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL, cod_owner, 'condicional')
+            x = busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL, cod_owner, 'fila') #verificando que el codigo de usuario que se ingreso existe    
+            if aux == True and usuarios[3][x] == tipos_user[1]:    # si existe y es un codigo de dueno se guarda
                 locales[column][fila] = cod_owner
                 cont += 1
             else:
@@ -531,17 +452,14 @@ def ingreso_codigos (column, fila):   #ingreso de los codigos y el estado
         else:
             os.system("cls")
             print("Codigo Invalido!!!!")
-       
-    locales[0][fila] = max_locales + 1   #en este punto se termina los input y se determia el codigo de local
-    column += 1             
+
+
+def asignar_codigo_active(fila,column):
+    locales[0][fila] = fila
+    
     locales[column][fila] = "A"          #y se le asigna una 'A' para su estado de activo 
     os.system("cls")
-    return False
-
-
-
-
-       
+  
 def ask_continue():
     aux2 = True
     while aux2 == True:
@@ -620,20 +538,29 @@ def precarga(): #precarga de los datos de las cuentas
     for i in range (0,6):
         locales[i][0] = encabezado[i]
              
-def busqueda(dato,limraw, limcolumn, dato_buscar): #busqueda secuencial bidimensional
+def busqueda(dato,limraw, limcolumn, dato_buscar, retorno): #busqueda secuencial bidimensional
     fila = 0
     condicional = False
     while condicional != True and fila <= limraw :
         column = 0
         while condicional != True and column <= limcolumn:
             if dato_buscar == dato[column][fila]:
-               return True, fila
+                if retorno == 'fila':
+                    return fila
+                else:
+                    return True
             elif dato[0][fila] == 0:
-                return False, fila
+                if retorno == 'fila':
+                    return fila
+                else:
+                    return False
             else:
                 column += 1
         fila += 1
-    return condicional, fila-1
+    
+    print ("Memoria llena")
+    return 
+
         
 def busqueda_uni (buscar, lim,buscado, aux): #busqueda unidimensional
     for i in range(0, lim):
@@ -643,23 +570,104 @@ def busqueda_uni (buscar, lim,buscado, aux): #busqueda unidimensional
             
 # def busq_dico()
 
-# def modificar ():
-#     os.system("cls")
-#     aux = ask_continue()
-#     if aux == 's':
-#         ver_locales()
+def modificar ():
+    modificar = ""
+    os.system("cls")
+    aux = ask_continue()
+    if aux == 's':
+        ver_locales()
+    cont = 0
+    if max_locales > 0:
+        while modificar != "*" and cont != 1:
+            os.system("cls")
+            print("---- ingres '*' para abortar 'modificar local' ----\n")
     
-#     x = False
-#     while x != True:
-#         os.system("cls")
-#         print("---- ingresando un ' * ' se sale de 'modificar local' ----\n")
+            modificar = input("ingrese el codigo del local a modificar: ")
+            if modificar != '*':
+                aprob = verif_num(modificar)
+                if aprob != False:
+                    modificar = int(modificar)
+                    condi = busqueda(locales, LIM_LOCALS_ROW, 0, modificar, 'condi')
+                    fila = busqueda(locales, max_locales, 0, modificar, 'fila')
+                    if condi != False:
+                        choice_modifi(fila,modificar)
+                        ordenar()
+                        cont += 1
+                        os.system("cls")
+                        print("---- Local Modificado ----\n")
+                    else: 
+                        os.system("cls")
+                        print("codigo invalido!!!")
+                else:
+                    os.system("cls")
+                    print("codigo invalido!!!")
+            else:
+                os.system("cls")
+    else:
+        os.system("cls")
+        print ("---- No se ha ingresado ningun local al sistema ----")
+        msvcrt.getch()
+        os.system("cls")
+    return
+
+def choice_modifi(fila,modificar):
+    condicional = True
+    while condicional == True:
+        os.system("cls")
+        print (f"---- Elija Atributo a Modificar del local {modificar}----\n")
+        print ("1) nombre")
+        print ("2) ubicacion")
+        print ("3) rubro")
+        print ("4) codigo dueño")
+        print ("0) salir")
+        opcion = input("ingrese un numero: ")
+
+        if opcion < '0' and opcion > "4":
+            opcion_erronea()
+        else:
+            os.system("cls")
+            condicional = elecciones_modifi(opcion, fila,modificar)
+    return
+
+def elecciones_modifi(opcion,fila, modificar):
+    match opcion:
+        case '1':
+            modifi_name (1 ,fila, modificar)
+            return True
+        case '2':
+            ingreso_ubi(2, fila) 
+            return True
+        case '3':
+            ingreso_rubro(3,fila)
+            return True
+        case '4':
+            ingreso_codigos (4,fila)
+            return True
+        case '0':
+            return False
+
+def modifi_name (column, fila,x):
+    cont = 0
+    while cont != 1 :
+        nombreLocal = (input("Ingrese el nombre del local: ")).capitalize()
+        
+        if len(nombreLocal) > 2:   
+            special = char_allow(nombreLocal)
+        
+            if special != True:       
+                    aprob = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL, nombreLocal, 'condi') #busqueda fila vacia en donde escribir el nombre
+                    if aprob != True :
+                        locales[column][fila] = nombreLocal
+                        cont+= 1                        #guardando el nombre
+                    else:
+                        repetido("el nombre")
+            else:
+                os.system("cls")
+                print("Caracter no permitido\n")
+        else:
+            print ("---- minimo de caracteres permitidos: 3 ----")
     
-#         modificar = input("ingrese el codigo del local a modificar: ")
-#         aprob = verif_num(modificar)
-#         if aprob != False:
-#             condi, fila = busqueda(locales, max_locales, 0, modificar)
-#             if condi != False:
-                
+               
                 
 
 def ordenar():  #funcion encargada de ordenar el array locales
@@ -698,7 +706,7 @@ def ver_locales():  #print en pantalla de la tabla de locales
             if locales[0][i] != 0:
                 print("")
                 for j in range(0,LIM_LOCALS_COL+1):
-                    x = 20 - len(str(locales[j][i]))
+                    x = 25 - len(str(locales[j][i]))
                     spaces = " " * x
                     if j == 3:
                         print (locales[j][i].capitalize(),spaces, end="")
@@ -717,12 +725,24 @@ def verif_num(str):
     if len(str) > 1:
         for i in range(0,len(str)):
             verifi = str[i]
-            if (verifi >= "0" and verifi <= "9"):
+            if not(verifi >= "0" and verifi <= "9"):
                 special = False
     else:
-        if (str >= "0" and str <= "9"):
+        if not(str >= "0" and str <= "9"):
             special = False
             
+    return special
+
+def char_allow (word):
+    special = False
+    for i in range(0,len(word)):
+            verifi = word[i]                                                 #verificando si tienes caracteres validos
+            verifi = verifi.upper()
+            if i == 0:
+                if verifi == " " or verifi == " " or verifi == "'" or verifi == "&":
+                    special = True
+            if ((verifi < "A" and verifi > "Z") or (verifi < "0" and verifi > "9")) and not(verifi != " " or verifi != "'" or verifi !="&" or verifi != "." ):
+                    special = True
     return special
 
 """""
