@@ -288,8 +288,8 @@ def elecciones_op1(opcion):  # acciones del menu y validacion 1)
             borrar()
             return True
         case "d":
-            en_contruccion()
-            return True #por hacer
+            mapa_locales()
+            return True 
         case "e":
             os.system("cls")
             return False
@@ -611,7 +611,35 @@ def borrar():
     return
 
 def mapa_locales ():
+    all_locals = 51
+    filas_map = 5
     
+ # Exibir mapa: 
+    os.system("cls")
+    print("---- Mapa del shopping ----\n")
+    
+   
+    cont = 1
+    while cont < all_locals:
+        column = 0
+        print("+--+--+--+--+--+")
+        while column < filas_map:
+            if locales[0][cont] <10:
+                print(f"|0{locales[0][cont]:^}", end="")
+            else:
+                print(f"|{locales[0][cont]:^}", end="")
+                
+            column += 1
+            cont += 1
+        print("|")    
+    print("+--+--+--+--+--+\n")
+    print("---- presione cualquier tecla para salir ----")
+    msvcrt.getch()
+    os.system("cls")
+        
+    
+    
+        
 
 def ask_continue(pregunta):
     aux2 = True
