@@ -590,11 +590,14 @@ def borrar():
                     borrar = int(borrar)
                     condi = busqueda(locales, LIM_LOCALS_ROW, 0, borrar, 'condi')
                     fila = busqueda(locales, max_locales, 0, borrar, 'fila')
-                    if condi != False:
+                    if condi != False and locales[5][fila] != "B":
                         locales[5][fila] = "B"
                         cont += 1
                         os.system("cls")
                         print("---- Local borrado ----\n")
+                    elif locales[5][fila] == "B":
+                        os.system("cls")
+                        print(f"---- el local {borrar} ya se encuentra dado de baja ----\n")
                     else: 
                         os.system("cls")
                         print("codigo invalido!!!\n")
@@ -637,10 +640,7 @@ def mapa_locales ():
     msvcrt.getch()
     os.system("cls")
         
-    
-    
         
-
 def ask_continue(pregunta):
     aux2 = True
     while aux2 == True:
@@ -753,8 +753,8 @@ def busqueda_uni (buscar, lim,buscado, aux): #busqueda unidimensional
 
 def ordenar():  #funcion encargada de ordenar el array locales
     if max_locales > 1:
-        for i in range(1,max_locales):
-                
+        for x in range(1,max_locales+1):
+            for i in range(1,max_locales):
                 first_character_1 = locales [1][i]          #se obtine la primera letra de una posicion en la columna de los nombres del array locales y se guarda en una variable
                 first_character_1 =  first_character_1[0]
                 
