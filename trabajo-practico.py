@@ -285,7 +285,7 @@ def elecciones_op1(opcion):  # acciones del menu y validacion 1)
             modificar ()
             return True
         case "c":
-            en_contruccion()
+            borrar()
             return True
         case "d":
             en_contruccion()
@@ -299,7 +299,8 @@ def crear_locales():  # accion de crear
     global max_locales
     nombreLocal = " "
     
-    aux = ask_continue()
+    pregunta = "desea ver los locales?"
+    aux = ask_continue(pregunta)
     if aux == 's':
         ver_locales()
     
@@ -410,7 +411,7 @@ def contador (type): #contador utilizado para la cantidad de locales
     cont = 0
     while fila <= max_locales :
         
-        if  locales[3][fila] == tipo_local[type]:
+        if  locales[3][fila] == tipo_local[type] and locales[5][fila] == "A":
             cont += 1
             
             
@@ -459,12 +460,164 @@ def asignar_codigo_active(fila,column):
     
     locales[column][fila] = "A"          #y se le asigna una 'A' para su estado de activo 
     os.system("cls")
+
+def modificar ():
+    if max_locales > 0:
+        modificar = ""
+        os.system("cls")
+        pregunta = "desea ver los locales?"
+        aux = ask_continue(pregunta)
+        if aux == 's':
+            ver_locales()
+        cont = 0
+        while modificar != "*" and cont != 1:
+            
+            print("---- ingrese '*' para salir ----\n")
+    
+            modificar = input("ingrese el codigo del local a modificar: ")
+            if modificar != '*':
+                aprob = verif_num(modificar)
+                if aprob != False:
+                    modificar = int(modificar)
+                    condi = busqueda(locales, LIM_LOCALS_ROW, 0, modificar, 'condi')
+                    fila = busqueda(locales, max_locales, 0, modificar, 'fila')
+                    if locales[5][fila] != "A":
+                        pregunta = "----El local que ingreso se encuentra dado de baja (B) ----\n\nDesea activarlo?"
+                        ask = ask_continue(pregunta)
+                        if ask != "n":
+                            locales[5][fila] = "A"
+                    
+                    if condi != False and locales[5][fila] != "B":
+                        choice_modifi(fila,modificar)
+                        ordenar()
+                        cont += 1
+                        os.system("cls")
+                        print("---- Local Modificado ----\n")
+                    elif condi != True: 
+                        os.system("cls")
+                        print("codigo invalido!!!\n")
+                    else:
+                        os.system("cls")
+                        print("--- Para modificar un local debe estar Activo (A) ---\n")
+                else:
+                    os.system("cls")
+                    print("codigo invalido!!!\n")
+            else:
+                os.system("cls")
+    else:
+        os.system("cls")
+        print ("---- No se ha ingresado ningun local al sistema ----")
+        msvcrt.getch()
+        os.system("cls")
+    return
+
+def choice_modifi(fila,modificar):
+    condicional = True
+    while condicional == True:
+        os.system("cls")
+        print (f"---- Elija Atributo a Modificar del local {modificar}----\n")
+        print ("1) nombre")
+        print ("2) ubicacion")
+        print ("3) rubro")
+        print ("4) codigo dueño")
+        print ("0) salir")
+        opcion = input("ingrese un numero: ")
+
+        if opcion < '0' and opcion > "4":
+            opcion_erronea()
+        else:
+            os.system("cls")
+            condicional = elecciones_modifi(opcion, fila,modificar)
+    return
+
+def elecciones_modifi(opcion,fila, modificar):
+    match opcion:
+        case '1':
+            modifi_name (1 ,fila, modificar)
+            return True
+        case '2':
+            ingreso_ubi(2, fila) 
+            return True
+        case '3':
+            ingreso_rubro(3,fila)
+            return True
+        case '4':
+            ingreso_codigos (4,fila)
+            return True
+        case '0':
+            return False
+
+def modifi_name (column, fila,x):
+    cont = 0
+    while cont != 1 :
+        nombreLocal = (input("Ingrese el nombre del local: ")).capitalize()
+        
+        if len(nombreLocal) > 2:   
+            special = char_allow(nombreLocal)
+        
+            if special != True:       
+                    aprob = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL, nombreLocal, 'condi') #busqueda fila vacia en donde escribir el nombre
+                    if aprob != True :
+                        locales[column][fila] = nombreLocal
+                        cont+= 1                        #guardando el nombre
+                    else:
+                        repetido("el nombre")
+            else:
+                os.system("cls")
+                print("Caracter no permitido\n")
+        else:
+            print ("---- minimo de caracteres permitidos: 3 ----")
   
-def ask_continue():
+
+def borrar():
+    borrar = ""
+    os.system("cls")
+   
+    if max_locales > 0:
+        pregunta = "desea ver los locales?"
+        aux = ask_continue(pregunta)
+        if aux == 's':
+            ver_locales()
+        cont = 0  
+        while borrar != "*" and cont != 1:
+            
+            print("---- ingrese '*' para salir ----\n")
+    
+            borrar = input("ingrese el codigo del local a borrar: ")
+            if borrar != '*':
+                aprob = verif_num(borrar)
+                if aprob != False:
+                    borrar = int(borrar)
+                    condi = busqueda(locales, LIM_LOCALS_ROW, 0, borrar, 'condi')
+                    fila = busqueda(locales, max_locales, 0, borrar, 'fila')
+                    if condi != False:
+                        locales[5][fila] = "B"
+                        cont += 1
+                        os.system("cls")
+                        print("---- Local borrado ----\n")
+                    else: 
+                        os.system("cls")
+                        print("codigo invalido!!!\n")
+                else:
+                    os.system("cls")
+                    print("codigo invalido!!!\n")
+            else:
+                os.system("cls")
+    else:
+        os.system("cls")
+        print ("---- No se ha ingresado ningun local al sistema ----")
+        msvcrt.getch()
+        os.system("cls")
+    return
+
+def mapa_locales ():
+    
+
+def ask_continue(pregunta):
     aux2 = True
     while aux2 == True:
         os.system("cls")
-        aux1 = input("desea ver los locales? (s/n)\n")  # preguntando si desea crear otro local
+        aux1 = input(f"{pregunta} (s/n)\n")  # preguntando si desea crear otro local
         aux1 = aux1.lower()
         if aux1 == "s" or aux1 == "n":  # validando respuesta
             aux2 = False
@@ -568,107 +721,7 @@ def busqueda_uni (buscar, lim,buscado, aux): #busqueda unidimensional
             aux = True
     return aux
             
-# def busq_dico()
-
-def modificar ():
-    modificar = ""
-    os.system("cls")
-    aux = ask_continue()
-    if aux == 's':
-        ver_locales()
-    cont = 0
-    if max_locales > 0:
-        while modificar != "*" and cont != 1:
-            os.system("cls")
-            print("---- ingres '*' para abortar 'modificar local' ----\n")
-    
-            modificar = input("ingrese el codigo del local a modificar: ")
-            if modificar != '*':
-                aprob = verif_num(modificar)
-                if aprob != False:
-                    modificar = int(modificar)
-                    condi = busqueda(locales, LIM_LOCALS_ROW, 0, modificar, 'condi')
-                    fila = busqueda(locales, max_locales, 0, modificar, 'fila')
-                    if condi != False:
-                        choice_modifi(fila,modificar)
-                        ordenar()
-                        cont += 1
-                        os.system("cls")
-                        print("---- Local Modificado ----\n")
-                    else: 
-                        os.system("cls")
-                        print("codigo invalido!!!")
-                else:
-                    os.system("cls")
-                    print("codigo invalido!!!")
-            else:
-                os.system("cls")
-    else:
-        os.system("cls")
-        print ("---- No se ha ingresado ningun local al sistema ----")
-        msvcrt.getch()
-        os.system("cls")
-    return
-
-def choice_modifi(fila,modificar):
-    condicional = True
-    while condicional == True:
-        os.system("cls")
-        print (f"---- Elija Atributo a Modificar del local {modificar}----\n")
-        print ("1) nombre")
-        print ("2) ubicacion")
-        print ("3) rubro")
-        print ("4) codigo dueño")
-        print ("0) salir")
-        opcion = input("ingrese un numero: ")
-
-        if opcion < '0' and opcion > "4":
-            opcion_erronea()
-        else:
-            os.system("cls")
-            condicional = elecciones_modifi(opcion, fila,modificar)
-    return
-
-def elecciones_modifi(opcion,fila, modificar):
-    match opcion:
-        case '1':
-            modifi_name (1 ,fila, modificar)
-            return True
-        case '2':
-            ingreso_ubi(2, fila) 
-            return True
-        case '3':
-            ingreso_rubro(3,fila)
-            return True
-        case '4':
-            ingreso_codigos (4,fila)
-            return True
-        case '0':
-            return False
-
-def modifi_name (column, fila,x):
-    cont = 0
-    while cont != 1 :
-        nombreLocal = (input("Ingrese el nombre del local: ")).capitalize()
-        
-        if len(nombreLocal) > 2:   
-            special = char_allow(nombreLocal)
-        
-            if special != True:       
-                    aprob = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL, nombreLocal, 'condi') #busqueda fila vacia en donde escribir el nombre
-                    if aprob != True :
-                        locales[column][fila] = nombreLocal
-                        cont+= 1                        #guardando el nombre
-                    else:
-                        repetido("el nombre")
-            else:
-                os.system("cls")
-                print("Caracter no permitido\n")
-        else:
-            print ("---- minimo de caracteres permitidos: 3 ----")
-    
-               
-                
+# def busq_dico()              
 
 def ordenar():  #funcion encargada de ordenar el array locales
     if max_locales > 1:
@@ -712,6 +765,7 @@ def ver_locales():  #print en pantalla de la tabla de locales
                         print (locales[j][i].capitalize(),spaces, end="")
                     else:
                         print (locales[j][i],spaces, end="")
+        print ("\n\n\nA = Local activo   B = Local dado de baja")
         msvcrt.getch() #esta funcion pausa el sistema hasta que el operador tipee cualquier letra
         os.system("cls")
     else:
@@ -745,16 +799,7 @@ def char_allow (word):
                     special = True
     return special
 
-"""""
-def borrar(loc_nom):
-    res = busqueda(locales, max_locales, 1, loc_nom)
-    if res[0] == True:
-        locales[busqueda[1]][5] = 'B'
-    else: 
-        print("No existe un local con tal nombre")
-        llamarFuncRaiz()
 
-"""""
 # programa principal
 os.system("cls")
 precarga()
