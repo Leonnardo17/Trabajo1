@@ -51,9 +51,6 @@ cont_per = 0
 cont_comida = 0
 max_locales = 0
 
-# auxiliares usados en crear_locales ()
-# aux1 = "y"
-aux2 = True
 
 #tipos de usuarios y locales
 tipos_user = ["administrador", "dueñoLocal", "cliente"]
@@ -387,7 +384,6 @@ def ingreso_rubro(column, fila): #ingreso de rubro
             print("rubro ivalido")
             
 def contador_rubro ():
-    global cont_comida, cont_per, cont_indu
     
     contador_max_min = [cont_indu, cont_per, cont_comida] #adiganando los contadores a un array
     for i in range(0,3):
