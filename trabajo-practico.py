@@ -288,28 +288,29 @@ def crear_locales():  # accion de crear
     if aux == 's':
         ver_locales()
     
-    if max_locales != 50:
-        while nombreLocal != "*":
-            column = 1
-            nombreLocal = ingreso_nombre()
-            if nombreLocal != '*':
-                fila = max_locales + 1
-                column += 1
-                ingreso_ubi(column, fila)
-                column += 1
-                ingreso_rubro (column, fila)
-                column += 1
-                ingreso_codigos(column, fila)
-                column += 1
-                asignar_codigo_active (fila,column)
-                max_locales += 1
-                ordenar()
-    else:
+    
+    while nombreLocal != "*" and max_locales != 50:
+        column = 1
+        nombreLocal = ingreso_nombre()
+        if nombreLocal != '*':
+            fila = max_locales + 1
+            column += 1
+            ingreso_ubi(column, fila)
+            column += 1
+            ingreso_rubro (column, fila)
+            column += 1
+            ingreso_codigos(column, fila)
+            column += 1
+            asignar_codigo_active (fila,column)
+            max_locales += 1
+            ordenar()
+    if max_locales == 50:
         os.system("cls")
+        print("--- presione cualquier tecla para salir ---\n")
         print ("maxima cantidad de locales alcanzada\n")
+        msvcrt.getch()
     
     os.system("cls")
-    
     contador_rubro()
     return
 
