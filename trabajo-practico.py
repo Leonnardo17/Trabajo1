@@ -12,7 +12,7 @@ import msvcrt
 # declaracion de variables
 # local
 nombreLocal = " "
-ubicacionLocal = " "
+nombreLocal = " "
 rubroLocal = " " 
 
 ENTERO = [0]
@@ -40,8 +40,6 @@ locales = [COD_LOCAL, NOMBRE_LOCAL, UBICACION_LOCAL, RUBRO, COD_USUARIO, ESTADO]
 LIM_LOCALS_ROW = 50
 LIM_LOCALS_COL = 5
 
-
-
 usr = ""  # variables para validacion de usuario
 contr_input = ""  # variables para validacion de contraseña
 i = 3  # variable tipo entero de la cantidad de intentos incorrectos
@@ -57,17 +55,6 @@ max_locales = 0
 # aux1 = "y"
 aux2 = True
 
-# variables locales de choice
-# iguales = " "
-# diferente = " "
-# a = 0
-# b = 0
-# c = 0
-
-# variables locales de mostrar_max_min() para saber el orden en que colocar el mayor y menor
-# int more_locals
-# int min_locals
-
 #tipos de usuarios y locales
 tipos_user = ["administrador", "dueñoLocal", "cliente"]
 tipo_local = ["indumentaria", "perfumeria", "comida"]
@@ -78,16 +65,16 @@ def validar_usuario(condicional):  # ingreso seguro de la contra asi como valida
     while condicional == True:
         usr = input("Ingrese su nombre de usuario: ")
         usr_aprob = busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL,usr, 'codi') #comprobando existenci de usuario
-        
+        num_fila_usr = busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL,usr, 'fila')
         contr_input = getpass.getpass("Ingrese su contraseña: ")
         contr_aprob = busqueda(usuarios , LIM_USERS_RAW, LIM_USERS_COL, contr_input, 'condi') #comprobando existencia de contrasenia
-        num_fila = busqueda(usuarios , LIM_USERS_RAW, LIM_USERS_COL, contr_input, 'fila')
-        if usr_aprob != False and contr_aprob != False:
+        num_fila_pass = busqueda(usuarios , LIM_USERS_RAW, LIM_USERS_COL, contr_input, 'fila')
+        if usr_aprob != False and contr_aprob != False and num_fila_usr == num_fila_pass:
             os.system("cls")
             print("ha iniciado sesion satisfactoriamente")
-            if usuarios[3][num_fila] == tipos_user[0]:                   #decidion del menu segun el tipo de usuario
+            if usuarios[3][num_fila_pass] == tipos_user[0]:                   #decidion del menu segun el tipo de usuario
                 condicional = val_menu_admin(condicional)
-            elif usuarios[3][num_fila] == tipos_user[1]:
+            elif usuarios[3][num_fila_pass] == tipos_user[1]:
                 condicional = val_menu_owner(condicional)
             else:
                 condicional = val_menu_client(condicional)
@@ -238,10 +225,10 @@ def menu_gestion (condicional):  # seleccion y validacion del submenu 1
         if opcion != "a" and opcion != "b" and opcion != "c" and opcion != "d":
             opcion_erronea()
         else:
-            condicional = elecciones_op1(opcion)
+            condicional = elecciones_desc(opcion)
 
 
-def elecciones_op1(opcion):  # acciones del submenu de duenos
+def elecciones_desc(opcion):  # acciones del submenu de duenos
     match opcion:
         case "a":
             en_contruccion()
@@ -253,7 +240,7 @@ def elecciones_op1(opcion):  # acciones del submenu de duenos
             en_contruccion()
             return True
         case "d":
-            return False #por hacer
+            return False 
 
 
 def menu_1():  #submenu_gestion_locales
@@ -337,7 +324,7 @@ def ingreso_nombre ():
         print("---- ingresando un ' * ' se termina el ingreso de locales ----\n")
         nombreLocal = (input("Ingrese el nombre del local: ")).capitalize()
         
-        if len(nombreLocal) > 2:   
+        if len(nombreLocal) > 2 and len(nombreLocal) <= 15:   
             special = char_allow(nombreLocal)
         
             if special != True:       
@@ -351,9 +338,12 @@ def ingreso_nombre ():
             else:
                 os.system("cls")
                 print("Caracter no permitido\n")
-        elif nombreLocal != '*':
+        elif nombreLocal != '*' and len(nombreLocal) < 3:
             os.system("cls")
             print ("---- minimo de caracteres permitidos: 3 ----")
+        elif nombreLocal != '*' and len(nombreLocal) > 15:
+             os.system("cls")
+             print ("---- maximo de caracteres permitidos: 15 ----")
     
     return nombreLocal
 
@@ -364,7 +354,7 @@ def ingreso_ubi (column, fila):
     while cont != 1:             
         ubicacionLocal = (input("Ingrese la ubicacion: ")).capitalize()                     #ingreso de ubicacion
         
-        if len(ubicacionLocal) > 3: 
+        if len(ubicacionLocal) > 3 and len(ubicacionLocal) <= 15: 
             special = char_allow(ubicacionLocal)              
                               
             if special != True:
@@ -373,9 +363,12 @@ def ingreso_ubi (column, fila):
             else:
                 os.system("cls")
                 print("Caracter no permitido\n")
-        else:
+        elif len(ubicacionLocal) < 4:
             os.system("cls")
             print("---- minimo de caracteres permitidos: 4 ---- ")
+        elif  len(ubicacionLocal) > 15:
+            os.system("cls")
+            print("---- maximo de caracteres permitidos: 15 ----")
 
 
 
@@ -527,13 +520,13 @@ def choice_modifi(fila,modificar):
             opcion_erronea()
         else:
             os.system("cls")
-            condicional = elecciones_modifi(opcion, fila,modificar)
+            condicional = elecciones_modifi(opcion, fila)
     return
 
-def elecciones_modifi(opcion,fila, modificar):
+def elecciones_modifi(opcion,fila):
     match opcion:
         case '1':
-            modifi_name (1 ,fila, modificar)
+            modifi_name (1 ,fila)
             return True
         case '2':
             ingreso_ubi(2, fila) 
@@ -547,12 +540,12 @@ def elecciones_modifi(opcion,fila, modificar):
         case '0':
             return False
 
-def modifi_name (column, fila,x):
+def modifi_name (column, fila,):
     cont = 0
     while cont != 1 :
         nombreLocal = (input("Ingrese el nombre del local: ")).capitalize()
         
-        if len(nombreLocal) > 2:   
+        if len(nombreLocal) > 2 and len(nombreLocal) <= 15:   
             special = char_allow(nombreLocal)
         
             if special != True:       
@@ -565,8 +558,12 @@ def modifi_name (column, fila,x):
             else:
                 os.system("cls")
                 print("Caracter no permitido\n")
-        else:
+        elif len(nombreLocal) < 3:
+            os.system("cls")
             print ("---- minimo de caracteres permitidos: 3 ----")
+        elif len(nombreLocal) > 15:
+             os.system("cls")
+             print ("---- maximo de caracteres permitidos: 15 ----")
   
 
 def borrar():
@@ -628,9 +625,9 @@ def mapa_locales ():
         print("+--+--+--+--+--+")
         while column < filas_map:
             if locales[0][cont] <10:
-                print(f"|0{locales[0][cont]:^}", end="")
+                print(f"|0{locales[0][cont]}", end="")
             else:
-                print(f"|{locales[0][cont]:^}", end="")
+                print(f"|{locales[0][cont]}", end="")
                 
             column += 1
             cont += 1
