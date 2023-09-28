@@ -5,6 +5,8 @@
 # Lopez Frias Facundo Manuel
 
 import getpass
+import io
+import pickle
 import os
 import msvcrt
 
@@ -55,6 +57,45 @@ max_locales = 0
 #tipos de usuarios y locales
 tipos_user = ["administrador", "dueñoLocal", "cliente"]
 tipo_local = ["indumentaria", "perfumeria", "comida"]
+
+class USUARIOS():
+    
+    def __init__(self):
+        self.codUsuario = 0
+        self.nombreUsuario = " "
+        self.claveUsuario = " "
+        self.tipoUsuario = " "
+
+
+class LOCALES():
+    def __init__(self):
+        self.codLocal = 0 
+        self.nombreLocal = " " 
+        self.rubroLocal = " "
+        self.codUsuario = 0
+        self.estado = " "
+        
+class PROMOCIONES():
+    def __init__(self):
+        self.codPromo = 0
+        self.textoPromo = " "
+        self.fechaDesdePromo = " "
+        self.fechaHastaPromo = " "
+        self.diasSemana = [0]*6
+        self.estado = " "
+        self.codLocal = 0
+
+def USO_PROMOCIONES():
+    def __init__(self):
+        self.codCliente = 0
+        self.codPromo = 0
+        self.fechaUsoPromo = " "
+
+
+def menu_inicio():
+    print("1. Ingresar con usuario registrado")
+    print("2. Registrarse como cliente")
+    print("3. Salir")
 
 
 def validar_usuario(condicional):  # ingreso seguro de la contra asi como validacion
@@ -700,14 +741,18 @@ def repetido(x):
     print (f" -{x} que intenta ingresar ya se encuentra guardado- \n")
 
 def precarga(): #precarga de los datos de las cuentas
-    users = ["codigo","Usuario","Clave","Tipo", 1,"admin@shopping.com", "12345", tipos_user[0], 4,"localA@shopping.com", "AAAA1111", tipos_user[1], 6, "localB@shopping.com","BBBB2222", tipos_user[1], 9, "unCliente@shopping.com", "33xx33",tipos_user[2]]
+
+    #, 4,"localA@shopping.com", "AAAA1111", tipos_user[1], 6, "localB@shopping.com","BBBB2222", tipos_user[1], 9, "unCliente@shopping.com", "33xx33",tipos_user[2]
+    #antiguos usuarios, se usaran despues para hacer pruebas!!!!
+    
+    users = ["codigo","Usuario","Clave","Tipo", 1,"admin@shopping.com", "12345", tipos_user[0]]
+    
     encabezado = ["Codigo del local", "nombre", "Ubicacion", "Rubro", "Codigo del usuario", "Estado"]
     cont = 0
     #precargando usuarios
     for i in range(0,5):
-        for j in range(0,4):
-            usuarios[j][i] = users[cont]
-            cont += 1
+        usuarios[1][i] = users[cont]
+        cont += 1
             
     #precarga encabezado de locales
     for i in range (0,6):
@@ -824,5 +869,12 @@ def char_allow (word):
 
 # programa principal
 os.system("cls")
+
+urlusuarios = "./USUARIOS.dat"
+if not(os.path.exists(urlusuarios)):
+    afusuarios = open(urlusuarios, "w+b")
+else:
+    afusuarios = open(urlusuarios, "r+b")
+
 precarga()
 validar_usuario(condicional)
