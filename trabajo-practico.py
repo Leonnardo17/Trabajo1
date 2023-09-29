@@ -91,11 +91,41 @@ def USO_PROMOCIONES():
         self.codPromo = 0
         self.fechaUsoPromo = " "
 
+def validar_inicio():
+    opcion = -1
+    while opcion != 3:
+        menu_inicio()
+        opcion = input("ingrese un numero: ")
+
+        if (opcion != "1" and opcion != "2" and opcion != "3"):
+            opcion_erronea()
+        elif (opcion != 3):
+            os.system("cls")
+            elecciones_inicio(opcion)
+
 
 def menu_inicio():
+    os.system("cls")
     print("1. Ingresar con usuario registrado")
     print("2. Registrarse como cliente")
     print("3. Salir")
+
+def elecciones_inicio(opcion):
+    match opcion:
+        case "1":
+            validar_usuario(True)
+            return 
+        case "2":
+            #registro()
+            return
+
+def lookFor (x):
+    global afusuarios
+    filelf = USUARIOS()
+    afusuarios.seek(0,0)
+    filelf = pickle.load(afusuarios)
+    
+    
 
 
 def validar_usuario(condicional):  # ingreso seguro de la contra asi como validacion
@@ -741,22 +771,36 @@ def repetido(x):
     print (f" -{x} que intenta ingresar ya se encuentra guardado- \n")
 
 def precarga(): #precarga de los datos de las cuentas
+    global afusuarios
 
     #, 4,"localA@shopping.com", "AAAA1111", tipos_user[1], 6, "localB@shopping.com","BBBB2222", tipos_user[1], 9, "unCliente@shopping.com", "33xx33",tipos_user[2]
     #antiguos usuarios, se usaran despues para hacer pruebas!!!!
     
-    users = ["codigo","Usuario","Clave","Tipo", 1,"admin@shopping.com", "12345", tipos_user[0]]
-    
-    encabezado = ["Codigo del local", "nombre", "Ubicacion", "Rubro", "Codigo del usuario", "Estado"]
+    users = [ 1,"admin@shopping.com", "12345", tipos_user[0]]
+    #"codigo","Usuario","Clave","Tipo"
+    #encabezado = ["Codigo del local", "nombre", "Ubicacion", "Rubro", "Codigo del usuario", "Estado"]
     cont = 0
-    #precargando usuarios
-    for i in range(0,5):
-        usuarios[1][i] = users[cont]
-        cont += 1
+    
+    #precargando usuario
+    b = USUARIOS()
+    b.codUsuario = users[0]
+    
+    b.nombreUsuario =  users[1] 
+        
+    b.claveUsuario = users[2]
+        
+    b.tipoUsuario = users[3]
+        
+    formatear(b)
+        
+    pickle.dump(b,afusuarios)
+    afusuarios.flush()
+        
+    cont += 1
             
     #precarga encabezado de locales
-    for i in range (0,6):
-        locales[i][0] = encabezado[i]
+    #for i in range (0,6):
+    #    locales[i][0] = encabezado[i]
              
 def busqueda(dato,limraw, limcolumn, dato_buscar, retorno): #busqueda secuencial bidimensional
     fila = 0
@@ -867,14 +911,26 @@ def char_allow (word):
     return special
 
 
+def formatear(b):
+    
+    b.codUsuario = str(b.codUsuario).ljust(3, ' ')
+    b.nombreUsuario = str(b.nombreUsuario).ljust(20, ' ')
+    b.claveUsuario = str(b.claveUsuario).ljust(8,' ')
+    b.tipoUsuario = str(b.tipoUsuario).ljust(12,' ')
+
+
 # programa principal
 os.system("cls")
 
 urlusuarios = "./USUARIOS.dat"
 if not(os.path.exists(urlusuarios)):
     afusuarios = open(urlusuarios, "w+b")
+    precarga()
 else:
     afusuarios = open(urlusuarios, "r+b")
 
-precarga()
-validar_usuario(condicional)
+
+
+validar_inicio()
+
+afusuarios.close()

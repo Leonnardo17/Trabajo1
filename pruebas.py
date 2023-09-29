@@ -1,86 +1,92 @@
-import tabulate
-INT = [0]
-STRING = [""]
+import getpass
+import io
+import pickle
+import os
+import msvcrt
+import pandas as pd
+import inspect
 
-COD = INT * 101
-USER = STRING * 101
-CLAVE = STRING * 101
-TIPO = STRING * 101
+tipos_user = ["administrador", "dueñoLocal", "cliente"]
 
-BASE = [COD, USER, CLAVE, TIPO]
-type_1 = "administrador"
-type_2 = "dueñoLocal"
-type_3 = "cliente"
-
-def precarga():
+class USUARIOS():
     
-    # Primer usuario
+    def __init__(self):
+        self.codUsuario = 0
+        self.nombreUsuario = " "
+        self.claveUsuario = " "
+        self.tipoUsuario = " "
+        
+    def __str__(self) :
+        return f'usuario: {self.codUsuario} ,{self.nombreUsuario}, {self.claveUsuario} , {self.tipoUsuario}'
+
+
+
+def precarga(): #precarga de los datos de las cuentas
+    global afusuarios, tipos_user
+
+    #, 4,"localA@shopping.com", "AAAA1111", tipos_user[1], 6, "localB@shopping.com","BBBB2222", tipos_user[1], 9, "unCliente@shopping.com", "33xx33",tipos_user[2]
+    #antiguos usuarios, se usaran despues para hacer pruebas!!!!
     
-    COD[0] = 1
-    USER[0] = "admin@shopping.com"
-    CLAVE[0] =  "12345   "
-    TIPO [0] = type_1
+    users = [ 1,"admin@shopping.com", "12345", tipos_user[0], 4,"localA@shopping.com", "AAAA1111", tipos_user[1], 6, "localB@shopping.com","BBBB2222", tipos_user[1], 9, "unCliente@shopping.com", "33xx33",tipos_user[2]]
 
-    # Segundo usuario
-
-    COD[1] = 4
-    USER[1] = "localA@shopping.com"
-    CLAVE[1]=  "AAAA1111"
-    TIPO [1]= type_2
-
-    # Tercer usuario
-
-    COD[2] = 6
-    USER[2] = "localB@shopping.com"
-    CLAVE[2] =  "BBBB2222"
-    TIPO [2] = type_2
-
-    # Cuarto usuario
-
-    COD[3] = 9
-    USER[3] = "unCliente@shopping.com"
-    CLAVE[3] =  "33xx33  "
-    TIPO [3] = type_3
+    cont = 0
     
+    #precargando usuario
+    
+    b = USUARIOS()
+    for i in range(0, 4):
+        
+        b.codUsuario = users[cont]
+        cont+=1
+        b.nombreUsuario =  users[cont]
+        cont+=1
+        b.claveUsuario = users[cont]
+        cont+=1
+        b.tipoUsuario = users[cont]
+        cont+=1
+        
+        formatear(b)
+        
+        pickle.dump(b,afusuarios)
+        afusuarios.flush()
+        
+       
+        
+ 
+def formatear(b):
+     b.codUsuario = str(b.codUsuario).ljust(3, ' ')
+     b.nombreUsuario = str(b.nombreUsuario).ljust(20, ' ')
+     b.claveUsuario = str(b.claveUsuario).ljust(8,' ')
+     b.tipoUsuario = str(b.tipoUsuario).ljust(12,' ')
 
 
-precarga()
+def lookFor (x):
+    global afusuarios
+    filelf = USUARIOS()
+    afusuarios.seek(2)
+    filelf = pickle.load(afusuarios)
+    print(filelf)
 
-x = BASE[1][3].upper()
-x = x[0]
-
-z = BASE[1][2].upper()
-z = z[0]
-
-if x > z: 
-    print(z, x)
-
-# for i in range (0,5):
-#     firstChar1 = BASE[1][i]
-#     firstChar2 = BASE[1][i+1]
-#     if firstChar1 > firstChar2:
-#         for j in range(0,4):
-#             aux = BASE[j][i]
-#             BASE[j][i] = BASE[1][i+1]
-#             BASE[j][i+1] = aux
+urlusuarios = "./USUARIOS.dat"
+if not(os.path.exists(urlusuarios)):
+    afusuarios = open(urlusuarios, "w+b")
+    precarga()
+else:
+    afusuarios = open(urlusuarios, "r+b")
 
 
-# locales_ordenados = locales
-#     for i in range(0,LIM_LOCALS_ROW-1):
-#         first_character_1 = locales [1][i]
-#         first_character_2 = locales [1][i+1]
-#         if first_character_1 > first_character_2:
-#             for j in range(0,LIM_LOCALS_COL):
-#                 aux = locales_ordenados[j][i]
-#                 locales_ordenados[j][i] = locales_ordenados[j][i+1]
-#                 locales_ordenados[j][i] = aux
+lookFor("12345")
 
 
-# name = 'mango'
+# afusuarios.seek(0,0)
+# x = USUARIOS()
+# x= pickle.load(afusuarios)
+# tam = afusuarios.tell()
+# afusuarios.seek(0,0)
+# x = pickle.load(afusuarios)
 
-# if len(name) > 0:
-#     firstChar = name[0]
-#     print(f'First character : {firstChar}')
-# else:
-#     print('The string is empty. Please check.')
-# print(BASE[3][0])
+# print (x.claveUsuario)
+
+
+
+
