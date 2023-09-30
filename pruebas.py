@@ -2,6 +2,7 @@ import getpass
 import io
 import pickle
 import os
+import os.path
 import msvcrt
 import pandas as pd
 import inspect
@@ -16,8 +17,8 @@ class USUARIOS():
         self.claveUsuario = " "
         self.tipoUsuario = " "
         
-    def __str__(self) :
-        return f'usuario: {self.codUsuario} ,{self.nombreUsuario}, {self.claveUsuario} , {self.tipoUsuario}'
+    # def __str__(self) :
+    #     return f'usuario: {self.codUsuario} ,{self.nombreUsuario}, {self.claveUsuario} , {self.tipoUsuario}'
 
 
 
@@ -45,7 +46,7 @@ def precarga(): #precarga de los datos de las cuentas
         b.tipoUsuario = users[cont]
         cont+=1
         
-        formatear(b)
+        # formatear(b)
         
         pickle.dump(b,afusuarios)
         afusuarios.flush()
@@ -53,19 +54,43 @@ def precarga(): #precarga de los datos de las cuentas
        
         
  
-def formatear(b):
-     b.codUsuario = str(b.codUsuario).ljust(3, ' ')
-     b.nombreUsuario = str(b.nombreUsuario).ljust(20, ' ')
-     b.claveUsuario = str(b.claveUsuario).ljust(8,' ')
-     b.tipoUsuario = str(b.tipoUsuario).ljust(12,' ')
+# def formatear(b):
+#      b.codUsuario = str(b.codUsuario).ljust(3, ' ')
+#      b.nombreUsuario = str(b.nombreUsuario).ljust(20, ' ')
+#      b.claveUsuario = str(b.claveUsuario).ljust(8,' ')
+#      b.tipoUsuario = str(b.tipoUsuario).ljust(12,' ')
 
 
-def lookFor (x):
-    global afusuarios
+def lookFor (x, attr):
+    global afusuarios, urlusuarios
+    condicional = False
+    afusuarios.seek(0,0 )
+    tam = os.path.getsize(urlusuarios)
     filelf = USUARIOS()
-    afusuarios.seek(2)
-    filelf = pickle.load(afusuarios)
-    print(filelf)
+    y = None
+    tipo = None
+    
+    while afusuarios.tell() <tam:
+        filelf = pickle.load(afusuarios)
+
+        
+        if attr == "code":
+            y = filelf.codUsuario
+        if attr == "nombre":
+            y = filelf.nombreUsuario
+        if attr == "clave":
+            y = filelf.claveUsuario
+        if attr == "tipo":
+            y = filelf.tipoUsuario
+
+        
+        if y == x:
+            condicional = True
+            tipo = filelf.tipoUsuario
+          
+    return condicional, tipo
+        
+         
 
 urlusuarios = "./USUARIOS.dat"
 if not(os.path.exists(urlusuarios)):
@@ -75,7 +100,14 @@ else:
     afusuarios = open(urlusuarios, "r+b")
 
 
-lookFor("12345")
+
+x = "12345"
+
+
+
+
+respuesta = lookFor(x, "clave")
+print(respuesta)
 
 
 # afusuarios.seek(0,0)

@@ -42,9 +42,7 @@ locales = [COD_LOCAL, NOMBRE_LOCAL, UBICACION_LOCAL, RUBRO, COD_USUARIO, ESTADO]
 LIM_LOCALS_ROW = 50
 LIM_LOCALS_COL = 5
 
-usr = ""  # variables para validacion de usuario
-contr_input = ""  # variables para validacion de contraseña
-i = 3  # variable tipo entero de la cantidad de intentos incorrectos
+
 condicional = True  # variable tipo bool
 
 # variables tipo entero. (contadores de Rubros)
@@ -85,15 +83,15 @@ class PROMOCIONES():
         self.estado = " "
         self.codLocal = 0
 
-def USO_PROMOCIONES():
+class USO_PROMOCIONES():
     def __init__(self):
         self.codCliente = 0
         self.codPromo = 0
         self.fechaUsoPromo = " "
 
 def validar_inicio():
-    opcion = -1
-    while opcion != 3:
+    opcion = "0"
+    while opcion != "3":
         menu_inicio()
         opcion = input("ingrese un numero: ")
 
@@ -116,33 +114,128 @@ def elecciones_inicio(opcion):
             validar_usuario(True)
             return 
         case "2":
-            #registro()
+            crear_usuario("cliente")
             return
 
-def lookFor (x):
-    global afusuarios
+def lookForUser (x, attr):
+    global afusuarios, urlusuarios
+    condicional = False
+    afusuarios.seek(0,0 )
+    tam = os.path.getsize(urlusuarios)
     filelf = USUARIOS()
+    attr_comparar = None
+    tipo = None
+    
+    while afusuarios.tell() <tam:
+        filelf = pickle.load(afusuarios)
+
+        
+        if attr == "code":
+            attr_comparar = filelf.codUsuario
+        if attr == "nombre":
+            attr_comparar = filelf.nombreUsuario
+        if attr == "clave":
+            attr_comparar = filelf.claveUsuario
+        if attr == "tipo":
+            attr_comparar = filelf.tipoUsuario
+
+        
+        if attr_comparar == x:
+            condicional = True
+            tipo = filelf.tipoUsuario
+            
+    return condicional, tipo
+    
+    
+def crear_usuario(tipo):
+    global afusuarios
+    usuario = USUARIOS()
+    
+    usuario.codUsuario = asig_codigo()
+    usuario.nombreUsuario = ingreso_mail()
+    usuario.claveUsuario = ingreso_clave()
+    usuario.tipoUsuario = tipo
+    
+    pickle.dump(usuario, afusuarios)
+    afusuarios.flush()
+        
+    
+def asig_codigo():
+    global afusuarios, urlusuarios
+    tam = os.path.getsize(urlusuarios)
+    aux = USUARIOS
+    
+    codigo = 0
+    cont = 0
+    
     afusuarios.seek(0,0)
-    filelf = pickle.load(afusuarios)
+    while  afusuarios.tell() < tam :
+        aux = pickle.load(afusuarios)
+        cont+=1
+        
+    afusuarios.seek(0,0)
     
+    iguales = True
     
+    while iguales != False and codigo <= cont:
+        codigo += 1
+        iguales, no_use = lookForUser(codigo, "code")
+        
+    return codigo
+        
+def  ingreso_mail():
+    dominio = "@shopping.com"
+    condicion = True
+    nombre = " "
+    while condicion == True and len(nombre)<=100:
+        os.system("cls")
+        print("  ----- ingrese un nombre de usuario  ( el sistema agregara el dominio @shopping.com!!!! ) -----")
+        nombre = input("")
+        nombre = nombre + dominio
+        if len(nombre)>100:
+            print("MAXIMA CANTIDAD DE CARACTERES PERMITIDOS: 100")
+            msvcrt.getch()
+        else:
+            condicion, no_use = lookForUser(nombre, "nombre")
+        
+    return nombre
+        
+    
+def ingreso_clave():
+    condicion = True
+    while condicion == True:
+        os.system("cls")
+        print("  ----- ingrese una clave con 8 digitos -----")
+        clave = input("")
+        
+        if len(clave) == 8:
+            condicion, no_use = lookForUser(clave, "clave")
+        else:
+            print("LA CLAVE DEBE TENER 8 DIGITOS")
+            msvcrt.getch()
+        
+    return clave
 
 
 def validar_usuario(condicional):  # ingreso seguro de la contra asi como validacion
-    global i
+    
+    usr = ""  # variables para validacion de usuario
+    contr_input = ""  # variables para validacion de contraseña
+    i = 3  # variable tipo entero de la cantidad de intentos incorrectos
+    
     while condicional == True:
+        
         usr = input("Ingrese su nombre de usuario: ")
-        usr_aprob = busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL,usr, 'codi') #comprobando existenci de usuario
-        num_fila_usr = busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL,usr, 'fila')
+        usr_aprob, tipo = lookForUser(usr,'nombre')
         contr_input = getpass.getpass("Ingrese su contraseña: ")
-        contr_aprob = busqueda(usuarios , LIM_USERS_RAW, LIM_USERS_COL, contr_input, 'condi') #comprobando existencia de contrasenia
-        num_fila_pass = busqueda(usuarios , LIM_USERS_RAW, LIM_USERS_COL, contr_input, 'fila')
-        if usr_aprob != False and contr_aprob != False and num_fila_usr == num_fila_pass:
+        contr_aprob = lookForUser(contr_input, "clave")
+    
+        if usr_aprob != False and contr_aprob[0] != False:
             os.system("cls")
             print("ha iniciado sesion satisfactoriamente")
-            if usuarios[3][num_fila_pass] == tipos_user[0]:                   #decidion del menu segun el tipo de usuario
+            if tipo == tipos_user[0]:                   #decidion del menu segun el tipo de usuario
                 condicional = val_menu_admin(condicional)
-            elif usuarios[3][num_fila_pass] == tipos_user[1]:
+            elif tipo == tipos_user[1]:
                 condicional = val_menu_owner(condicional)
             else:
                 condicional = val_menu_client(condicional)
@@ -399,7 +492,7 @@ def ingreso_nombre ():
             if special != True:       
                     aprob = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL, nombreLocal, 'condi') #busqueda fila vacia en donde escribir el nombre
                     fila = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL, nombreLocal, 'fila')
-                    if aprob != True:
+                    if aprob == True:
                         locales[1][fila] = nombreLocal
                         cont+= 1#guardando el nombre
                     else:
@@ -779,7 +872,7 @@ def precarga(): #precarga de los datos de las cuentas
     users = [ 1,"admin@shopping.com", "12345", tipos_user[0]]
     #"codigo","Usuario","Clave","Tipo"
     #encabezado = ["Codigo del local", "nombre", "Ubicacion", "Rubro", "Codigo del usuario", "Estado"]
-    cont = 0
+    
     
     #precargando usuario
     b = USUARIOS()
@@ -791,12 +884,12 @@ def precarga(): #precarga de los datos de las cuentas
         
     b.tipoUsuario = users[3]
         
-    formatear(b)
+    #formatear(b)
         
     pickle.dump(b,afusuarios)
     afusuarios.flush()
         
-    cont += 1
+   
             
     #precarga encabezado de locales
     #for i in range (0,6):
@@ -911,12 +1004,12 @@ def char_allow (word):
     return special
 
 
-def formatear(b):
+# def formatear(b):
     
-    b.codUsuario = str(b.codUsuario).ljust(3, ' ')
-    b.nombreUsuario = str(b.nombreUsuario).ljust(20, ' ')
-    b.claveUsuario = str(b.claveUsuario).ljust(8,' ')
-    b.tipoUsuario = str(b.tipoUsuario).ljust(12,' ')
+#     b.codUsuario = str(b.codUsuario).ljust(3, ' ')
+#     b.nombreUsuario = str(b.nombreUsuario).ljust(20, ' ')
+#     b.claveUsuario = str(b.claveUsuario).ljust(8,' ')
+#     b.tipoUsuario = str(b.tipoUsuario).ljust(12,' ')
 
 
 # programa principal
@@ -930,7 +1023,14 @@ else:
     afusuarios = open(urlusuarios, "r+b")
 
 
+urllocales = "./LOCALES.dat"
+if not (os.path.exists(urllocales)):
+    aflocales = open (urllocales, "w+b")
+else:
+    aflocales = open (urllocales, "r+b")
+
 
 validar_inicio()
 
 afusuarios.close()
+aflocales.close()
