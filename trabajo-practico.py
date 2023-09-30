@@ -69,6 +69,7 @@ class LOCALES():
     def __init__(self):
         self.codLocal = 0 
         self.nombreLocal = " " 
+        self.ubicacionLocal = " "
         self.rubroLocal = " "
         self.codUsuario = 0
         self.estado = " "
@@ -325,7 +326,8 @@ def elecciones_admin(opcion): #elecciones del menu de administrador
             return True
 
         case "2":
-            en_contruccion()
+            crear_usuario("dueñoLocal")
+            os.system("cls")
             return True
 
         case "3":
@@ -444,8 +446,9 @@ def elecciones_op1(opcion):  # acciones del menu y validacion 1)
 
 
 def crear_locales():  # accion de crear
-    global max_locales
-    nombreLocal = " "
+    global max_locales, aflocales, urllocales
+    local = LOCALES()
+    local.nombreLocal = " "
     
     pregunta = "desea ver los locales?"
     aux = ask_continue(pregunta)
@@ -453,21 +456,34 @@ def crear_locales():  # accion de crear
         ver_locales()
     
     
-    while nombreLocal != "*" and max_locales != 50:
-        column = 1
-        nombreLocal = ingreso_nombre()
-        if nombreLocal != '*':
-            fila = max_locales + 1
-            column += 1
-            ingreso_ubi(column, fila)
-            column += 1
-            ingreso_rubro (column, fila)
-            column += 1
-            ingreso_codigos(column, fila)
-            column += 1
-            asignar_codigo_active (fila,column)
-            max_locales += 1
-            ordenar()
+    userOwner = lookForUser("dueñoLocal", "tipo")
+    
+    if userOwner[0] != False:
+        while local.nombreLocal != "*" and max_locales != 50:
+            
+            local.nombreLocal = ingreso_nombre()
+            
+            if local.nombreLocal != '*':
+                
+                local.ubicacionLocal = ingreso_ubi()
+                
+                local.rubroLocal = ingreso_rubro ()
+                
+                local.codUsuario = ingreso_codigos()
+                
+                local.codLocal = asig_codLocal()
+                
+                local.estado = "A"
+                #asignar_codigo_active (fila,column)
+                
+                pickle.dump(local, aflocales)
+                aflocales.flush()
+                
+                max_locales = cuentaLocales()
+                ordenar()
+    else:
+        print("----- No existe una cuenta tipo dueño -----")
+        msvcrt.getch()
     if max_locales == 50:
         os.system("cls")
         print("--- presione cualquier tecla para salir ---\n")
@@ -478,7 +494,47 @@ def crear_locales():  # accion de crear
     contador_rubro()
     return
 
+def cuentaLocales():
+    global aflocales, urllocales
+    cont = 0
+    tam = os.path.getsize(urllocales)
+    aflocales.seek(0,0)
+    while aflocales.tell() < tam:
+        x = pickle.load(aflocales)
+        cont +=1
+    return cont
+
+def lookForLocals(x, attr):
+    global aflocales, urllocales
+    condicional = False
+    aflocales.seek(0,0 )
+    tam = os.path.getsize(urllocales)
+    filelf = LOCALES()
+    attr_comparar = None
+    tipo = None
+    
+    while afusuarios.tell() < tam:
+        filelf = pickle.load(afusuarios)
+        
+        if attr == "codigoUsuario":
+            attr_comparar = filelf.codUsuario
+        if attr == "nombre":
+            attr_comparar = filelf.nombreLocal
+        if attr == "Ubicacion":
+            attr_comparar = filelf.ubicacionLocal
+        if attr == "estado":
+            attr_comparar = filelf.estado
+        if attr =="codigoLocal":
+            attr_comparar = filelf.codLocal
+            
+        if attr_comparar == x:
+            condicional = True
+                
+    return condicional, tipo
+
+
 def ingreso_nombre ():
+    os.system("cls")
     cont = 0
     nombreLocal = " "
     while cont != 1 and nombreLocal != "*":
@@ -488,21 +544,22 @@ def ingreso_nombre ():
         
         if len(nombreLocal) > 2 and len(nombreLocal) <= 15:   
             special = char_allow(nombreLocal)
-        
-            if special != True:       
-                    aprob = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL, nombreLocal, 'condi') #busqueda fila vacia en donde escribir el nombre
-                    fila = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL, nombreLocal, 'fila')
-                    if aprob == True:
-                        locales[1][fila] = nombreLocal
-                        cont+= 1#guardando el nombre
-                    else:
-                        repetido("el nombre")
+            
+            if special != True: 
+                aprob = lookForLocals(nombreLocal, "nombre") 
+                
+                if aprob != True:
+                    cont+= 1  #saliendo de loop si no se repite
+                else:
+                    repetido("el nombre")
             else:
                 os.system("cls")
                 print("Caracter no permitido\n")
+                
         elif nombreLocal != '*' and len(nombreLocal) < 3:
             os.system("cls")
             print ("---- minimo de caracteres permitidos: 3 ----")
+            
         elif nombreLocal != '*' and len(nombreLocal) > 15:
              os.system("cls")
              print ("---- maximo de caracteres permitidos: 15 ----")
@@ -510,7 +567,7 @@ def ingreso_nombre ():
     return nombreLocal
 
 
-def ingreso_ubi (column, fila):
+def ingreso_ubi ():
     cont = 0
     os.system("cls")
     while cont != 1:             
@@ -519,8 +576,7 @@ def ingreso_ubi (column, fila):
         if len(ubicacionLocal) > 3 and len(ubicacionLocal) <= 15: 
             special = char_allow(ubicacionLocal)              
                               
-            if special != True:
-                locales[column][fila] = ubicacionLocal                                   #guardando ubicacion
+            if special != True:                                  #guardando ubicacion
                 cont += 1
             else:
                 os.system("cls")
@@ -531,23 +587,64 @@ def ingreso_ubi (column, fila):
         elif  len(ubicacionLocal) > 15:
             os.system("cls")
             print("---- maximo de caracteres permitidos: 15 ----")
+            
+    return ubicacionLocal
 
 
-
-def ingreso_rubro(column, fila): #ingreso de rubro
+def ingreso_rubro(): #ingreso de rubro
     os.system("cls")
     aux = False
     while aux != True:
         rubroLocal = input("Escoja un rubro: indumentaria, perfumería o comida\n")
         rubroLocal = (rubroLocal.lower())  # en caso de tipear una mayuscula la transformamos a minuscula
-        aux = busqueda_uni(tipo_local, 3, rubroLocal, aux) #verificando existencia del rubro
+        aux = busqueda_uni(tipo_local, 3, rubroLocal) #verificando existencia del rubro
         os.system("cls")
-        if aux != False:
-            locales[column][fila] = rubroLocal
-        else:
-            
+        if aux == False:
             print("rubro ivalido")
             
+    return rubroLocal
+
+def busqueda_uni (buscar, lim,buscado): #busqueda unidimensional
+    aux = False
+    for i in range(0, lim):
+        if buscar [i] == buscado:
+            aux = True
+    return aux
+
+def asig_codLocal():
+    global aflocales, urllocales
+    
+    aux = LOCALES
+    cont = 0
+    tam = os.path.getsize(urllocales)
+    aflocales.seek(0,0)
+    while tam > aflocales.tell():
+        aux = pickle.load(aflocales) 
+        cont+=1
+        
+    return cont+1
+
+def ingreso_codigos ():   #ingreso de los codigos y el estado
+    cont = 0
+    
+    while cont != 1:                                                                                                           
+        cod_owner = input("ingrese el codigo: ")
+        aprob = verif_num(cod_owner)                 #verificando si en el numero es numero para cuando se intente pasar de str a int no de error (logramos descartar el try que teniamos antes)                                                 
+        if aprob != False:
+            cod_owner = int(cod_owner)
+            aux, tipo =  lookForUser(cod_owner, "code") 
+               
+            if aux == True and tipo == tipos_user[1]:    # si existe y es un codigo de dueno se guarda
+                cont += 1
+            else:
+                os.system("cls")
+                print("Codigo Invalido!!!!")
+        else:
+            os.system("cls")
+            print("Codigo Invalido!!!!")
+    
+    return cod_owner
+         
 def contador_rubro ():
     
     contador_max_min = [cont_indu, cont_per, cont_comida] #adiganando los contadores a un array
@@ -561,16 +658,19 @@ def contador_rubro ():
     print("---------  ----------")
     
 def contador (type): #contador utilizado para la cantidad de locales 
-    fila = 1
+    global aflocales,urllocales
     cont = 0
-    while fila <= max_locales :
-        
-        if  locales[3][fila] == tipo_local[type] and locales[5][fila] == "A":
+    tam = os.path.getsize(urllocales)
+    aflocales.seek(0,0)
+    aux = LOCALES()
+    
+    while aflocales.tell() < tam :
+        aux = pickle.load(aflocales)
+        if  aux.rubroLocal == tipo_local[type] and aux.estado == "A":
             cont += 1
-            
-            
-        fila += 1
+                
     return cont
+
 
 def max_min_arrays(dato, tipo):                     #funcion encargada de  ordenar el array que contiene los contadores de mayor a menor (necesita ser usada dos veces consecutivas)
     for j in range(0,3):
@@ -588,32 +688,6 @@ def max_min_arrays(dato, tipo):                     #funcion encargada de  orden
             
     return dato, tipo
 
-def ingreso_codigos (column, fila):   #ingreso de los codigos y el estado
-    cont = 0
-    
-    while cont != 1:                                                                                                           
-        cod_owner = input("ingrese el codigo: ")
-        aprob = verif_num(cod_owner)                 #verificando si en el numero es numero para cuando se intente pasar de str a int no de error (logramos descartar el try que teniamos antes)                                                 
-        if aprob != False:
-            cod_owner = int(cod_owner)
-            aux = busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL, cod_owner, 'condicional')
-            x = busqueda(usuarios, LIM_USERS_RAW, LIM_USERS_COL, cod_owner, 'fila') #verificando que el codigo de usuario que se ingreso existe    
-            if aux == True and usuarios[3][x] == tipos_user[1]:    # si existe y es un codigo de dueno se guarda
-                locales[column][fila] = cod_owner
-                cont += 1
-            else:
-                os.system("cls")
-                print("Codigo Invalido!!!!")
-        else:
-            os.system("cls")
-            print("Codigo Invalido!!!!")
-
-
-def asignar_codigo_active(fila,column):
-    locales[0][fila] = fila
-    
-    locales[column][fila] = "A"          #y se le asigna una 'A' para su estado de activo 
-    os.system("cls")
 
 def modificar ():
     if max_locales > 0:
@@ -865,14 +939,8 @@ def repetido(x):
 
 def precarga(): #precarga de los datos de las cuentas
     global afusuarios
-
-    #, 4,"localA@shopping.com", "AAAA1111", tipos_user[1], 6, "localB@shopping.com","BBBB2222", tipos_user[1], 9, "unCliente@shopping.com", "33xx33",tipos_user[2]
-    #antiguos usuarios, se usaran despues para hacer pruebas!!!!
     
     users = [ 1,"admin@shopping.com", "12345", tipos_user[0]]
-    #"codigo","Usuario","Clave","Tipo"
-    #encabezado = ["Codigo del local", "nombre", "Ubicacion", "Rubro", "Codigo del usuario", "Estado"]
-    
     
     #precargando usuario
     b = USUARIOS()
@@ -888,12 +956,7 @@ def precarga(): #precarga de los datos de las cuentas
         
     pickle.dump(b,afusuarios)
     afusuarios.flush()
-        
-   
-            
-    #precarga encabezado de locales
-    #for i in range (0,6):
-    #    locales[i][0] = encabezado[i]
+
              
 def busqueda(dato,limraw, limcolumn, dato_buscar, retorno): #busqueda secuencial bidimensional
     fila = 0
@@ -918,57 +981,86 @@ def busqueda(dato,limraw, limcolumn, dato_buscar, retorno): #busqueda secuencial
     print ("Memoria llena")
     return 
 
-        
-def busqueda_uni (buscar, lim,buscado, aux): #busqueda unidimensional
-    for i in range(0, lim):
-        if buscar [i] == buscado:
-            aux = True
-    return aux
             
 # def busq_dico()              
 
 def ordenar():  #funcion encargada de ordenar el array locales
+    global aflocales, urllocales, max_locales
+    max_locales = cuentaLocales()
+    
     if max_locales > 1:
-        for x in range(1,max_locales+1):
-            for i in range(1,max_locales):
-                first_character_1 = locales [1][i]          #se obtine la primera letra de una posicion en la columna de los nombres del array locales y se guarda en una variable
-                first_character_1 =  first_character_1[0]
+        aflocales.seek(0,0)
+        aux = pickle.load(aflocales)
+        wherefile = aflocales.tell()
+        tamfile = os.path.getsize(urllocales)
+        cantrep = int(tamfile/wherefile)
+        auxi = LOCALES()
+        auxj = LOCALES()
+        for i in range(0,cantrep-1):
+            for j in range(i+1,cantrep):
+                aflocales.seek(i*wherefile, 0)
+                auxi = pickle.load(aflocales)
+                aflocales.seek(j*wherefile,0)
+                auxj = pickle.load(aflocales)
                 
-                first_character_2 = locales [1][i+1]        #luego se hace lo mismo con la posicion siguiente
-                first_character_2 = first_character_2[0]
-        
+                first_character_1 = auxi.nombreLocal[0]         #se obtine la primera letra de una posicion en la columna de los nombres del array locales y se guarda en una variable
+                
+                first_character_2 = auxj.nombreLocal[0]       #luego se hace lo mismo con la posicion siguiente
+                
                 if first_character_1 > first_character_2:
-                    for j in range(0,LIM_LOCALS_COL+1):     #si la primera es mayor (ASCII)  que la segunda se intercambian 
-                        aux = locales[j][i]
-                        locales[j][i] = locales[j][i+1]
-                        locales[j][i+1] = aux
+                    aflocales.seek(i*wherefile, 0)
+                    pickle.dump(auxj, aflocales)
+                    aflocales.seek(j*wherefile,0)
+                    pickle.dump(auxj,aflocales)
+                    aflocales.flush()
                         
-                elif first_character_1 == first_character_2: #si son iguales se compara la segunda letra
-                    second_character_1 = locales [1][i]
-                    second_character_1 =  second_character_1[1]
-                
-                    second_character_2 = locales [1][i+1]
-                    second_character_2 = second_character_2[1]
-                    if second_character_1 > second_character_2:  #y si esta segunda letra es mayor en el primer nombre se intercambian
-                        for j in range(0,LIM_LOCALS_COL+1):
-                            aux = locales[j][i]
-                            locales[j][i] = locales[j][i+1]
-                            locales[j][i+1] = aux
-    return
-        
+    
 def ver_locales():  #print en pantalla de la tabla de locales 
+    global aflocales, urllocales, max_locales
+    max_locales = cuentaLocales()
     if max_locales != 0:
         print ("Presione culaquier tecla para continuar\n")
-        for i in range(0,LIM_LOCALS_ROW):
-            if locales[0][i] != 0:
-                print("")
-                for j in range(0,LIM_LOCALS_COL+1):
-                    x = 25 - len(str(locales[j][i]))
-                    spaces = " " * x
-                    if j == 3:
-                        print (locales[j][i].capitalize(),spaces, end="")
-                    else:
-                        print (locales[j][i],spaces, end="")
+        aflocales.seek(0,0)
+        tam = os.path.getsize(urllocales)
+        aux = LOCALES()
+        
+        #Encabezado
+        print ("Codigo Local              ",end="")
+        print ("Nombre                    ",end="") 
+        print ("Ubicacion                 ",end="")
+        print ("Rubro                     ",end="")
+        print ("Codigo dueño              ",end="")
+        print ("Estado                    ",end="")
+        
+        while aflocales.tell() < tam:
+            aux = pickle.load(aflocales)
+            print("")
+            
+            x = 25 - len(str(aux.codLocal))
+            spaces = " " * x
+            print (str(aux.codLocal).capitalize(),spaces, end="")
+            
+            x = 25 - len(aux.nombreLocal)
+            spaces = " " * x
+            print (aux.nombreLocal.capitalize(),spaces, end="")
+            
+            x = 25 - len(aux.ubicacionLocal)
+            spaces = " " * x
+            print (aux.ubicacionLocal.capitalize(),spaces, end="")
+            
+            x = 25 - len(aux.rubroLocal)
+            spaces = " " * x
+            print (aux.rubroLocal.capitalize(),spaces, end="")
+            
+            x = 25 - len(str(aux.codUsuario))
+            spaces = " " * x
+            print (str(aux.codUsuario).capitalize(),spaces, end="")
+            
+            x = 25 - len(aux.estado)
+            spaces = " " * x
+            print (aux.estado.capitalize(),spaces, end="")
+            
+                
         print ("\n\n\nA = Local activo   B = Local dado de baja")
         msvcrt.getch() #esta funcion pausa el sistema hasta que el operador tipee cualquier letra
         os.system("cls")
@@ -977,7 +1069,7 @@ def ver_locales():  #print en pantalla de la tabla de locales
         print ("presione cualquier tecla para continuar\n")
         msvcrt.getch()
         os.system("cls")
-        
+    
 def verif_num(str):
     special = True
     if len(str) > 1:
@@ -1012,6 +1104,13 @@ def char_allow (word):
 #     b.tipoUsuario = str(b.tipoUsuario).ljust(12,' ')
 
 
+# def formatear_locales(x):
+#     x.codLocal = str(x.codLocal) 
+#     x.nombreLocal = str(x.nombreLocal).ljust(15, " ") 
+#     x.ubicacionLocal = str(x.ubicacionLocal).ljust(15," ")
+#     x.rubroLocal = str(x.rubroLocal).ljust(12," ")
+#     x.codUsuario = str(x.codUsuario)
+    
 # programa principal
 os.system("cls")
 
