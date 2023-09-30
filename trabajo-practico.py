@@ -17,32 +17,6 @@ nombreLocal = " "
 nombreLocal = " "
 rubroLocal = " " 
 
-ENTERO = [0]
-STRING = [""]
-
-# Usuarios 
-COD = ENTERO * 101
-USER = STRING * 101
-CLAVE = STRING * 101
-TIPO = STRING * 101
-
-usuarios = [COD, USER, CLAVE, TIPO]
-LIM_USERS_RAW = 100
-LIM_USERS_COL = 3
-
-#Locales
-COD_LOCAL = ENTERO * 51
-NOMBRE_LOCAL = STRING * 51
-UBICACION_LOCAL = STRING * 51
-COD_USUARIO = ENTERO * 51
-ESTADO = STRING * 51
-RUBRO = STRING * 51
-
-locales = [COD_LOCAL, NOMBRE_LOCAL, UBICACION_LOCAL, RUBRO, COD_USUARIO, ESTADO]
-LIM_LOCALS_ROW = 50
-LIM_LOCALS_COL = 5
-
-
 condicional = True  # variable tipo bool
 
 # variables tipo entero. (contadores de Rubros)
@@ -68,10 +42,10 @@ class USUARIOS():
 class LOCALES():
     def __init__(self):
         self.codLocal = 0 
+        self.codUsuario = 0
         self.nombreLocal = " " 
         self.ubicacionLocal = " "
         self.rubroLocal = " "
-        self.codUsuario = 0
         self.estado = " "
         
 class PROMOCIONES():
@@ -128,6 +102,7 @@ def lookForUser (x, attr):
     tipo = None
     
     while afusuarios.tell() <tam:
+        prueba = afusuarios.tell()
         filelf = pickle.load(afusuarios)
 
         
@@ -474,6 +449,8 @@ def crear_locales():  # accion de crear
                 local.codLocal = asig_codLocal()
                 
                 local.estado = "A"
+                
+                formatear_locales(local)
                 #asignar_codigo_active (fila,column)
                 
                 pickle.dump(local, aflocales)
@@ -497,41 +474,44 @@ def crear_locales():  # accion de crear
 def cuentaLocales():
     global aflocales, urllocales
     cont = 0
-    tam = os.path.getsize(urllocales)
     aflocales.seek(0,0)
-    while aflocales.tell() < tam:
-        x = pickle.load(aflocales)
-        cont +=1
+    tam = os.path.getsize(urllocales)
+    if tam > 0:
+        while aflocales.tell() < tam:
+            prueba = aflocales.tell()
+            x = pickle.load(aflocales)
+            cont +=1
     return cont
 
 def lookForLocals(x, attr):
     global aflocales, urllocales
     condicional = False
-    aflocales.seek(0,0 )
+    aflocales.seek(0,0)
     tam = os.path.getsize(urllocales)
     filelf = LOCALES()
     attr_comparar = None
-    tipo = None
+    pos =  None
     
-    while afusuarios.tell() < tam:
-        filelf = pickle.load(afusuarios)
+    while aflocales.tell() < tam:
+        before = aflocales.tell()
+        filelf = pickle.load(aflocales)
         
         if attr == "codigoUsuario":
-            attr_comparar = filelf.codUsuario
+            attr_comparar = filelf.codUsuario.strip()
         if attr == "nombre":
-            attr_comparar = filelf.nombreLocal
+            attr_comparar = filelf.nombreLocal.strip()
         if attr == "Ubicacion":
-            attr_comparar = filelf.ubicacionLocal
+            attr_comparar = filelf.ubicacionLocal.strip()
         if attr == "estado":
-            attr_comparar = filelf.estado
+            attr_comparar = filelf.estado.strip()
         if attr =="codigoLocal":
-            attr_comparar = filelf.codLocal
+            attr_comparar = filelf.codLocal.strip()
             
         if attr_comparar == x:
             condicional = True
+            pos = before
                 
-    return condicional, tipo
-
+    return condicional,pos
 
 def ingreso_nombre ():
     os.system("cls")
@@ -546,7 +526,7 @@ def ingreso_nombre ():
             special = char_allow(nombreLocal)
             
             if special != True: 
-                aprob = lookForLocals(nombreLocal, "nombre") 
+                aprob, pos_no_use = lookForLocals(nombreLocal, "nombre") 
                 
                 if aprob != True:
                     cont+= 1  #saliendo de loop si no se repite
@@ -665,8 +645,9 @@ def contador (type): #contador utilizado para la cantidad de locales
     aux = LOCALES()
     
     while aflocales.tell() < tam :
+        prueba = aflocales.tell()
         aux = pickle.load(aflocales)
-        if  aux.rubroLocal == tipo_local[type] and aux.estado == "A":
+        if  (aux.rubroLocal).strip() == tipo_local[type] and aux.estado == "A":
             cont += 1
                 
     return cont
@@ -690,6 +671,7 @@ def max_min_arrays(dato, tipo):                     #funcion encargada de  orden
 
 
 def modificar ():
+    global aflocales, urllocales
     if max_locales > 0:
         modificar = ""
         os.system("cls")
@@ -706,27 +688,34 @@ def modificar ():
             if modificar != '*':
                 aprob = verif_num(modificar)
                 if aprob != False:
-                    modificar = int(modificar)
-                    condi = busqueda(locales, LIM_LOCALS_ROW, 0, modificar, 'condi')
-                    fila = busqueda(locales, max_locales, 0, modificar, 'fila')
-                    if locales[5][fila] != "A":
-                        pregunta = "----El local que ingreso se encuentra dado de baja (B) ----\n\nDesea activarlo?"
-                        ask = ask_continue(pregunta)
-                        if ask != "n":
-                            locales[5][fila] = "A"
-                    
-                    if condi != False and locales[5][fila] != "B":
-                        choice_modifi(fila,modificar)
-                        ordenar()
-                        cont += 1
-                        os.system("cls")
-                        print("---- Local Modificado ----\n")
-                    elif condi != True: 
-                        os.system("cls")
-                        print("codigo invalido!!!\n")
-                    else:
-                        os.system("cls")
-                        print("--- Para modificar un local debe estar Activo (A) ---\n")
+                    condi, pos = lookForLocals(modificar, "codigoLocal")
+                    if condi != False:
+                        local = LOCALES()
+                        aflocales.seek(pos, 0)
+                        local = pickle.load(aflocales)
+                        if local.estado != "A":
+                            pregunta = "----El local que ingreso se encuentra dado de baja (B) ----\n\nDesea activarlo?"
+                            ask = ask_continue(pregunta)
+                            if ask != "n":
+                                local.estado = "A"
+                        
+                        if  local.estado != "B":
+                            choice_modifi(local)
+                            formatear_locales(local)
+                            aflocales.seek(pos,0)
+                            pickle.dump(local, aflocales)
+                            aflocales.flush()
+                            
+                            ordenar()
+                            cont += 1
+                            os.system("cls")
+                            print("---- Local Modificado ----\n")
+                        elif condi != True: 
+                            os.system("cls")
+                            print("codigo invalido!!!\n")
+                        else:
+                            os.system("cls")
+                            print("--- Para modificar un local debe estar Activo (A) ---\n")
                 else:
                     os.system("cls")
                     print("codigo invalido!!!\n")
@@ -739,11 +728,11 @@ def modificar ():
         os.system("cls")
     return
 
-def choice_modifi(fila,modificar):
+def choice_modifi(modificar):
     condicional = True
     while condicional == True:
         os.system("cls")
-        print (f"---- Elija Atributo a Modificar del local {modificar}----\n")
+        print (f"---- Elija Atributo a Modificar del local {modificar.codLocal}----\n")
         print ("1) nombre")
         print ("2) ubicacion")
         print ("3) rubro")
@@ -755,27 +744,27 @@ def choice_modifi(fila,modificar):
             opcion_erronea()
         else:
             os.system("cls")
-            condicional = elecciones_modifi(opcion, fila)
+            condicional = elecciones_modifi(opcion, modificar)
     return
 
-def elecciones_modifi(opcion,fila):
+def elecciones_modifi(opcion,modificar):
     match opcion:
         case '1':
-            modifi_name (1 ,fila)
+            modificar.nombreLocal = modifi_name ()
             return True
         case '2':
-            ingreso_ubi(2, fila) 
+            modificar.ubicacionLocal = ingreso_ubi() 
             return True
         case '3':
-            ingreso_rubro(3,fila)
+            modificar.rubroLocal = ingreso_rubro()
             return True
         case '4':
-            ingreso_codigos (4,fila)
+            modificar.codUsuario = ingreso_codigos ()
             return True
         case '0':
             return False
 
-def modifi_name (column, fila,):
+def modifi_name ():
     cont = 0
     while cont != 1 :
         nombreLocal = (input("Ingrese el nombre del local: ")).capitalize()
@@ -783,13 +772,12 @@ def modifi_name (column, fila,):
         if len(nombreLocal) > 2 and len(nombreLocal) <= 15:   
             special = char_allow(nombreLocal)
         
-            if special != True:       
-                    aprob = busqueda(locales, LIM_LOCALS_ROW, LIM_LOCALS_COL, nombreLocal, 'condi') #busqueda fila vacia en donde escribir el nombre
-                    if aprob != True :
-                        locales[column][fila] = nombreLocal
-                        cont+= 1                        #guardando el nombre
-                    else:
-                        repetido("el nombre")
+            if special != True: 
+                aprob, no_use = lookForLocals(nombreLocal, "nombre")      #busqueda verificacndo que no existe otro local con el mismo nombre
+                if aprob != True :
+                    cont+= 1                        
+                else:
+                    repetido("el nombre")
             else:
                 os.system("cls")
                 print("Caracter no permitido\n")
@@ -799,9 +787,11 @@ def modifi_name (column, fila,):
         elif len(nombreLocal) > 15:
              os.system("cls")
              print ("---- maximo de caracteres permitidos: 15 ----")
-  
+             
+    return nombreLocal
 
 def borrar():
+    global aflocales, urllocales
     borrar = ""
     os.system("cls")
    
@@ -816,24 +806,26 @@ def borrar():
             print("---- ingrese '*' para salir ----\n")
     
             borrar = input("ingrese el codigo del local a borrar: ")
+            
             if borrar != '*':
-                aprob = verif_num(borrar)
-                if aprob != False:
-                    borrar = int(borrar)
-                    condi = busqueda(locales, LIM_LOCALS_ROW, 0, borrar, 'condi')
-                    fila = busqueda(locales, max_locales, 0, borrar, 'fila')
-                    if condi != False and locales[5][fila] != "B":
-                        locales[5][fila] = "B"
+                condi, pos = lookForLocals(borrar, "codigoLocal")
+                if condi != False :
+                    local = LOCALES()
+                    aflocales.seek(pos, 0)
+                    local = pickle.load(aflocales)
+                    if local.estado != "B":
                         cont += 1
+                        aflocales.seek(pos,0)
+                        local.estado = "B"
+                        pickle.dump(local,aflocales)
+                        aflocales.flush()
                         os.system("cls")
                         print("---- Local borrado ----\n")
-                    elif locales[5][fila] == "B":
+                    else:
                         os.system("cls")
                         print(f"---- el local {borrar} ya se encuentra dado de baja ----\n")
-                    else: 
-                        os.system("cls")
-                        print("codigo invalido!!!\n")
-                else:
+                        
+                else: 
                     os.system("cls")
                     print("codigo invalido!!!\n")
             else:
@@ -846,6 +838,7 @@ def borrar():
     return
 
 def mapa_locales ():
+    global aflocales, urllocales
     all_locals = 51
     filas_map = 5
     
@@ -853,19 +846,23 @@ def mapa_locales ():
     os.system("cls")
     print("---- Mapa del shopping ----\n")
     
-   
-    cont = 1
-    while cont < all_locals:
-        column = 0
+    local = LOCALES()
+    aflocales.seek(0,0)
+    for i in range(0,10):
         print("+--+--+--+--+--+")
-        while column < filas_map:
-            if locales[0][cont] <10:
-                print(f"|0{locales[0][cont]}", end="")
+        for j in range(0,5):
+        
+            try:
+                local = pickle.load(aflocales)
+                nro = int(local.codLocal)
+            except:
+                nro = 0
+    
+            if nro <10:
+                print(f"|0{nro}", end="")
             else:
-                print(f"|{locales[0][cont]}", end="")
+                print(f"|{nro}", end="")
                 
-            column += 1
-            cont += 1
         print("|")    
     print("+--+--+--+--+--+\n")
     print("---- presione cualquier tecla para salir ----")
@@ -996,24 +993,25 @@ def ordenar():  #funcion encargada de ordenar el array locales
         cantrep = int(tamfile/wherefile)
         auxi = LOCALES()
         auxj = LOCALES()
+        
         for i in range(0,cantrep-1):
             for j in range(i+1,cantrep):
+                
                 aflocales.seek(i*wherefile, 0)
                 auxi = pickle.load(aflocales)
+                first_character_1 = auxi.nombreLocal[0].upper()  #se obtine la primera letra de una posicion en la columna de los nombres del array locales y se guarda en una variable
+                    
                 aflocales.seek(j*wherefile,0)
-                auxj = pickle.load(aflocales)
-                
-                first_character_1 = auxi.nombreLocal[0]         #se obtine la primera letra de una posicion en la columna de los nombres del array locales y se guarda en una variable
-                
-                first_character_2 = auxj.nombreLocal[0]       #luego se hace lo mismo con la posicion siguiente
-                
+                auxj = pickle.load(aflocales)  
+                first_character_2 = auxj.nombreLocal[0].upper()       #luego se hace lo mismo con la posicion siguiente
+                    
                 if first_character_1 > first_character_2:
                     aflocales.seek(i*wherefile, 0)
                     pickle.dump(auxj, aflocales)
                     aflocales.seek(j*wherefile,0)
-                    pickle.dump(auxj,aflocales)
+                    pickle.dump(auxi,aflocales)
                     aflocales.flush()
-                        
+                            
     
 def ver_locales():  #print en pantalla de la tabla de locales 
     global aflocales, urllocales, max_locales
@@ -1104,12 +1102,15 @@ def char_allow (word):
 #     b.tipoUsuario = str(b.tipoUsuario).ljust(12,' ')
 
 
-# def formatear_locales(x):
-#     x.codLocal = str(x.codLocal) 
-#     x.nombreLocal = str(x.nombreLocal).ljust(15, " ") 
-#     x.ubicacionLocal = str(x.ubicacionLocal).ljust(15," ")
-#     x.rubroLocal = str(x.rubroLocal).ljust(12," ")
-#     x.codUsuario = str(x.codUsuario)
+def formatear_locales(x):
+     x.codLocal = str(x.codLocal) 
+     x.codLocal = x.codLocal.ljust(3," ") 
+     x.nombreLocal = str(x.nombreLocal).ljust(15, " ") 
+     x.ubicacionLocal = str(x.ubicacionLocal).ljust(15," ")
+     x.rubroLocal = str(x.rubroLocal).ljust(12," ")
+     x.codUsuario = str(x.codUsuario)
+     x.codUsuario = x.codUsuario.ljust(3, " ")
+     x.estado = str(x.estado)
     
 # programa principal
 os.system("cls")
@@ -1128,6 +1129,8 @@ if not (os.path.exists(urllocales)):
 else:
     aflocales = open (urllocales, "r+b")
 
+
+max_locales = cuentaLocales()
 
 validar_inicio()
 
