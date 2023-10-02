@@ -4,16 +4,15 @@
 # Goyenechea Álvaro
 # Lopez Frias Facundo Manuel
 
+import datetime
 import getpass
 import io
 import pickle
 import os
 import msvcrt
 
-
 # declaracion de variables
 # local
-nombreLocal = " "
 nombreLocal = " "
 rubroLocal = " " 
 
@@ -24,7 +23,6 @@ cont_indu = 0
 cont_per = 0
 cont_comida = 0
 max_locales = 0
-
 
 #tipos de usuarios y locales
 tipos_user = ["administrador", "dueñoLocal", "cliente"]
@@ -38,7 +36,6 @@ class USUARIOS():
         self.claveUsuario = " "
         self.tipoUsuario = " "
 
-
 class LOCALES():
     def __init__(self):
         self.codLocal = 0 
@@ -47,7 +44,7 @@ class LOCALES():
         self.ubicacionLocal = " "
         self.rubroLocal = " "
         self.estado = " "
-        
+               
 class PROMOCIONES():
     def __init__(self):
         self.codPromo = 0
@@ -75,7 +72,6 @@ def validar_inicio():
         elif (opcion != 3):
             os.system("cls")
             elecciones_inicio(opcion)
-
 
 def menu_inicio():
     os.system("cls")
@@ -107,18 +103,18 @@ def lookForUser (x, attr):
 
         
         if attr == "code":
-            attr_comparar = filelf.codUsuario
+            attr_comparar = filelf.codUsuario.strip()
         if attr == "nombre":
-            attr_comparar = filelf.nombreUsuario
+            attr_comparar = filelf.nombreUsuario.strip()
         if attr == "clave":
-            attr_comparar = filelf.claveUsuario
+            attr_comparar = filelf.claveUsuario.strip()
         if attr == "tipo":
-            attr_comparar = filelf.tipoUsuario
+            attr_comparar = filelf.tipoUsuario.strip()
 
         
         if attr_comparar == x:
             condicional = True
-            tipo = filelf.tipoUsuario
+            tipo = filelf.tipoUsuario.strip()
             
     return condicional, tipo
     
@@ -132,6 +128,7 @@ def crear_usuario(tipo):
     usuario.claveUsuario = ingreso_clave()
     usuario.tipoUsuario = tipo
     
+    formatear_usuario(usuario)
     pickle.dump(usuario, afusuarios)
     afusuarios.flush()
         
@@ -839,9 +836,6 @@ def borrar():
 
 def mapa_locales ():
     global aflocales, urllocales
-    all_locals = 51
-    filas_map = 5
-    
  # Exibir mapa: 
     os.system("cls")
     print("---- Mapa del shopping ----\n")
@@ -1034,31 +1028,24 @@ def ver_locales():  #print en pantalla de la tabla de locales
             aux = pickle.load(aflocales)
             print("")
             
-            x = 25 - len(str(aux.codLocal))
-            spaces = " " * x
+            spaces = (25 - len(str(aux.codLocal))) * " "
             print (str(aux.codLocal).capitalize(),spaces, end="")
             
-            x = 25 - len(aux.nombreLocal)
-            spaces = " " * x
+            spaces = (25 - len(aux.nombreLocal)) * " "
             print (aux.nombreLocal.capitalize(),spaces, end="")
             
-            x = 25 - len(aux.ubicacionLocal)
-            spaces = " " * x
+            spaces = (25 - len(aux.ubicacionLocal)) * " "
             print (aux.ubicacionLocal.capitalize(),spaces, end="")
             
-            x = 25 - len(aux.rubroLocal)
-            spaces = " " * x
+            spaces = (25 - len(aux.rubroLocal)) * " "
             print (aux.rubroLocal.capitalize(),spaces, end="")
             
-            x = 25 - len(str(aux.codUsuario))
-            spaces = " " * x
+            spaces = (25 - len(str(aux.codUsuario))) * " "
             print (str(aux.codUsuario).capitalize(),spaces, end="")
             
-            x = 25 - len(aux.estado)
-            spaces = " " * x
+            spaces = (25 - len(aux.estado)) * " "
             print (aux.estado.capitalize(),spaces, end="")
-            
-                
+          
         print ("\n\n\nA = Local activo   B = Local dado de baja")
         msvcrt.getch() #esta funcion pausa el sistema hasta que el operador tipee cualquier letra
         os.system("cls")
@@ -1094,12 +1081,13 @@ def char_allow (word):
     return special
 
 
-# def formatear(b):
+def formatear_usuario(usr):
     
-#     b.codUsuario = str(b.codUsuario).ljust(3, ' ')
-#     b.nombreUsuario = str(b.nombreUsuario).ljust(20, ' ')
-#     b.claveUsuario = str(b.claveUsuario).ljust(8,' ')
-#     b.tipoUsuario = str(b.tipoUsuario).ljust(12,' ')
+    usr.codUsuario = str(usr.codUsuario)
+    usr.codUsuario = usr.codUsuario.ljust(3, ' ')
+    usr.nombreUsuario = str(usr.nombreUsuario).ljust(20, ' ')
+    usr.claveUsuario = str(usr.claveUsuario).ljust(8,' ')
+    usr.tipoUsuario = str(usr.tipoUsuario).ljust(13,' ')
 
 
 def formatear_locales(x):
