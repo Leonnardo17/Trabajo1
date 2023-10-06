@@ -2,10 +2,9 @@
 # Kalbermatter Lautaro
 # Zega Juan Cruz
 # Goyenechea Álvaro
-# Lopez Frias Facundo Manuel
+# Leonardo Lugo
 
 import getpass
-import io
 import pickle
 import os
 import msvcrt
@@ -63,6 +62,7 @@ class PROMOCIONES():
         self.diasSemana = [0]*6
         self.estado = " "
         self.codLocal = 0
+        
 class USO_PROMOCIONES():
     def __init__(self):
         self.codCliente = 0
@@ -99,12 +99,10 @@ def elecciones_inicio(opcion):
 
 def lookForUser (x, attr):
     global afusuarios, urlusuarios
-    condicional = False
     afusuarios.seek(0,0 )
     tam = os.path.getsize(urlusuarios)
     filelf = USUARIOS()
     attr_comparar = None
-    tipo = None
     
     while afusuarios.tell() <tam:
         prueba = afusuarios.tell()
@@ -120,11 +118,9 @@ def lookForUser (x, attr):
             attr_comparar = filelf.tipoUsuario
 
         if attr_comparar == x:
-            condicional = True
-            tipo = filelf.tipoUsuario
             pos = prueba
             
-    return condicional, tipo, pos
+    return pos
     
 def crear_usuario(tipo):
     global afusuarios
@@ -151,14 +147,12 @@ def asig_codigo():
     while  afusuarios.tell() < tam :
         aux = pickle.load(afusuarios)
         cont+=1
-        
-    afusuarios.seek(0,0)
     
-    iguales = True
+    pos = 0
     
-    while iguales != False and codigo <= cont:
+    while pos != -1 and codigo <= cont:
         codigo += 1
-        iguales, no_use = lookForUser(codigo, "code")
+        pos = lookForUser(codigo, "code")
         
     return codigo
         
@@ -166,7 +160,8 @@ def  ingreso_mail():
     dominio = "@shopping.com"
     condicion = True
     nombre = " "
-    while condicion == True and len(nombre)<=100:
+    pos = 0
+    while pos != -1:
         os.system("cls")
         print("  ----- ingrese un nombre de usuario  ( el sistema agregara el dominio @shopping.com!!!! ) -----")
         nombre = input("")
@@ -175,7 +170,7 @@ def  ingreso_mail():
             print("MAXIMA CANTIDAD DE CARACTERES PERMITIDOS: 100")
             msvcrt.getch()
         else:
-            condicion, no_use = lookForUser(nombre, "nombre")
+            pos = lookForUser(nombre, "nombre")
         
     return nombre
         
@@ -205,16 +200,17 @@ def validar_usuario(condicional):  # ingreso seguro de la contra asi como valida
     while condicional == True:
         
         usr = input("Ingrese su nombre de usuario: ")
-        usr_aprob, tipo = lookForUser(usr,'nombre')
+        pos = lookForUser(usr,'nombre')
         contr_input = getpass.getpass("Ingrese su contraseña: ")
-        contr_aprob = lookForUser(contr_input, "clave")
+        afusuarios.seek(pos,0)
+        user = pickle.load(afusuarios)
     
-        if usr_aprob != False and contr_aprob[0] != False:
+        if user.claveUsuario == contr_input:
             os.system("cls")
             print("ha iniciado sesion satisfactoriamente")
-            if tipo == tipos_user[0]:                   #decidion del menu segun el tipo de usuario
+            if user.tipoUsuario == tipos_user[0]:                   #decidion del menu segun el tipo de usuario
                 condicional = val_menu_admin(condicional)
-            elif tipo == tipos_user[1]:
+            elif user.tipoUsuario == tipos_user[1]:
                 condicional = val_menu_owner(condicional)
             else:
                 condicional = val_menu_client(condicional)
@@ -234,14 +230,6 @@ def menu_prin_client():  #menu para clientes
     print ("2. Buscar descuentos en locales")
     print ("3. Solicitar descuento")
     print ("4. Ver novedades")
-    print ("0. Salir")
-
-def menu_prin_admin(): #menu para administrador
-    print ("1. Gestión de locales")
-    print ("2. Crear cuentas de dueños de locales")
-    print ("3. Aprobar / Denegar solicitud de descuento")
-    print ("4. Gestión de Novedades")
-    print ("5. Reporte de utilización de descuentos")
     print ("0. Salir")
     
 def menu_prin_owner(): # menu para dueños
@@ -318,8 +306,9 @@ def elecciones_client(opcion):  #elecciones del cliente (por construir)
             return True
 
         case "3":
-            codigo_promo = input("Ingrese el codigo de la promocion: ")
-            solicitar_descuento(cliente_logueado, codigo_promo, promociones)
+            # codigo_promo = input("Ingrese el codigo de la promocion: ")
+            # solicitar_descuento(cliente_logueado, codigo_promo, promociones)
+            en_contruccion()
             return True
 
         case "4":
@@ -330,57 +319,18 @@ def elecciones_client(opcion):  #elecciones del cliente (por construir)
             print("saliendo del programa")
             return False
 
-
-def val_menu_admin(condicional): #validacion de opciones del menu para administrador
-    while condicional == True:
-        menu_prin_admin()
-        opcion = input("ingrese un numero: ")
-
-        if (opcion != "0" and opcion != "1" and opcion != "2" and opcion != "3" and opcion != "4" and opcion != "5"):
-            opcion_erronea()
-        else:
-            os.system("cls")
-            condicional = elecciones_admin(opcion)
-
-
-def elecciones_admin(opcion): #elecciones del menu de administrador
-      match opcion:
-        case "1":
-            menu_op1(condicional)
-            return True
-
-        case "2":
-            crear_usuario("dueñoLocal")
-            os.system("cls")
-            return True
-
-        case "3":
-            aprobar_denegar_desc()
-            return True
-
-        case "4":
-            val_opc_menu_4(condicional)
-            return True
-        case "5":
-            reporte_desc()
-            return True
-        case "0":
-            print("saliendo del programa")
-            return False
-
 ## Opciones del dueño
 
 def lookForPromo (x, attr):
     global alpromo, afpromo
-    condicional = False
     alpromo.seek(0,0)
     tam = os.path.getsize(afpromo)
     filelf = PROMOCIONES()
     attr_comparar = None
-    tipo = None
+    pos = -1
     
     while alpromo.tell() <tam:
-        prueba = alpromo.tell()
+        before = alpromo.tell()
         filelf = pickle.load(alpromo)
 
         
@@ -401,10 +351,9 @@ def lookForPromo (x, attr):
 
 
         if attr_comparar == x:
-            condicional = True
-            pos = prueba
+            pos = before
             
-    return condicional, pos
+    return pos
     
 
 def val_menu_owner(condicional): #validacion de opciones del menu para duenos
@@ -436,7 +385,6 @@ def elecciones_owner(opcion): #elecciones para el menu de duenos (por construir)
             return False
         
 def crear_descuento():
-    filelf = PROMOCIONES()
     nombre = usr
     # Busco el nombre del usuario logueado:
     index = lookForUser(nombre, "nombre")
@@ -448,7 +396,7 @@ def crear_descuento():
     for i in due_locals:
         loc = lookForPromo(i, 'local')
         #Verifico si el local tiene promociones:
-        if loc[0] == True:
+        if loc != -1:
             promos = verify_promos(i, datetime.date.today, datetime.date.today, False)
             if promos.length() > 0:
                 print('El local: ', i, 'tiene las siguientes promociones disponibles: ')
@@ -484,7 +432,8 @@ def verify_promos(x, desde, hasta, e):
 def reporte_desc():
     global nombre    
     # Busco el nombre y los indices de los locales del dueño logueado
-    index = lookForUser(nombre, "nombre")
+    pos = lookForUser(nombre, "nombre")
+    # arreglar para que funcione con la pocision
     due_locals = manyLocals(index[1])
 
     print('Ingrese la primer fecha del rango deseado: ')
@@ -502,10 +451,13 @@ def reporte_desc():
         for j in verificadas.length():
             usos = sacar_usos()
             ## A terminar: mostrar los datos requeridos
+
 def exh_nombre():
     True
 def sacar_usos():
     True
+    
+
 def get_fecha():
     q = False
     while q != True:
@@ -523,9 +475,10 @@ def get_fecha():
     while q != True:
         a = input('Año: ')
         a = int(a)
-        if a >= 1900:
+        if a >= datetime.datetime.today().year:
             q = True
     des = datetime.date(d, m, a)
+    return des
     
           
 def manyLocals(cod):
@@ -592,7 +545,53 @@ def elecciones_desc(opcion):  # acciones del submenu de duenos
             return True
         case "d":
             return False 
+        
+# Menus de Administrador
 
+def menu_prin_admin(): #menu para administrador
+    print ("1. Gestión de locales")
+    print ("2. Crear cuentas de dueños de locales")
+    print ("3. Aprobar / Denegar solicitud de descuento")
+    print ("4. Gestión de Novedades")
+    print ("5. Reporte de utilización de descuentos")
+    print ("0. Salir")
+
+def val_menu_admin(condicional): #validacion de opciones del menu para administrador
+    while condicional == True:
+        menu_prin_admin()
+        opcion = input("ingrese un numero: ")
+
+        if (opcion != "0" and opcion != "1" and opcion != "2" and opcion != "3" and opcion != "4" and opcion != "5"):
+            opcion_erronea()
+        else:
+            os.system("cls")
+            condicional = elecciones_admin(opcion)
+
+
+def elecciones_admin(opcion): #elecciones del menu de administrador
+      match opcion:
+        case "1":
+            menu_op1(condicional)
+            return True
+
+        case "2":
+            crear_usuario("dueñoLocal")
+            os.system("cls")
+            return True
+
+        case "3":
+            aprobar_denegar_desc()
+            return True
+
+        case "4":
+            val_opc_menu_4()
+            return True
+        case "5":
+            reporte_desc()
+            return True
+        case "0":
+            print("saliendo del programa")
+            return False
 
 def menu_1():  #submenu_gestion_locales
     print("a) Crear locales")
@@ -605,7 +604,7 @@ def menu_1():  #submenu_gestion_locales
 def menu_op1(condicional):  # seleccion y validacion del submenu 1
     while condicional == True:
         menu_1()
-        opcion = input("ecsriba una opcion: ")
+        opcion = input("escriba una opcion: ")
         opcion = opcion.lower()
         if opcion != "a" and opcion != "b" and opcion != "c" and opcion != "d" and opcion != "e":
             opcion_erronea()
@@ -646,7 +645,7 @@ def crear_locales():  # accion de crear
     
     userOwner = lookForUser("dueñoLocal", "tipo")
     
-    if userOwner[0] != False:
+    if userOwner != -1:
         while local.nombreLocal != "*" and max_locales != 50:
             
             local.nombreLocal = ingreso_nombre()
@@ -703,7 +702,7 @@ def lookForLocals(x, attr):
     tam = os.path.getsize(urllocales)
     filelf = LOCALES()
     attr_comparar = None
-    pos =  None
+    pos =  -1
     
     while aflocales.tell() < tam:
         before = aflocales.tell()
@@ -721,10 +720,9 @@ def lookForLocals(x, attr):
             attr_comparar = filelf.codLocal.strip()
             
         if attr_comparar == x:
-            condicional = True
             pos = before
                 
-    return condicional,pos
+    return pos
 
 def ingreso_nombre ():
     os.system("cls")
@@ -739,9 +737,9 @@ def ingreso_nombre ():
             special = char_allow(nombreLocal)
             
             if special != True: 
-                aprob, pos_no_use = lookForLocals(nombreLocal, "nombre") 
+                pos = lookForLocals(nombreLocal, "nombre") 
                 
-                if aprob != True:
+                if pos != -1:
                     cont+= 1  #saliendo de loop si no se repite
                 else:
                     repetido("el nombre")
@@ -825,10 +823,14 @@ def ingreso_codigos ():   #ingreso de los codigos y el estado
         aprob = verif_num(cod_owner)                 #verificando si en el numero es numero para cuando se intente pasar de str a int no de error (logramos descartar el try que teniamos antes)                                                 
         if aprob != False:
             cod_owner = int(cod_owner)
-            aux, tipo =  lookForUser(cod_owner, "code") 
+            pos =  lookForUser(cod_owner, "code") 
                
-            if aux == True and tipo == tipos_user[1]:    # si existe y es un codigo de dueno se guarda
-                cont += 1
+            if pos != -1: 
+                afusuarios.seek(pos,0)
+                aux = USUARIOS()
+                aux = pickle.load(afusuarios)
+                if aux.tipoUsuario == tipos_user[1]:    # si existe y es un codigo de dueno se guarda
+                    cont += 1
             else:
                 os.system("cls")
                 print("Codigo Invalido!!!!")
@@ -901,8 +903,8 @@ def modificar ():
             if modificar != '*':
                 aprob = verif_num(modificar)
                 if aprob != False:
-                    condi, pos = lookForLocals(modificar, "codigoLocal")
-                    if condi != False:
+                    pos = lookForLocals(modificar, "codigoLocal")
+                    if pos != -1:
                         local = LOCALES()
                         aflocales.seek(pos, 0)
                         local = pickle.load(aflocales)
@@ -923,7 +925,7 @@ def modificar ():
                             cont += 1
                             os.system("cls")
                             print("---- Local Modificado ----\n")
-                        elif condi != True: 
+                        elif pos == -1: 
                             os.system("cls")
                             print("codigo invalido!!!\n")
                         else:
@@ -986,8 +988,8 @@ def modifi_name ():
             special = char_allow(nombreLocal)
         
             if special != True: 
-                aprob, no_use = lookForLocals(nombreLocal, "nombre")      #busqueda verificando que no existe otro local con el mismo nombre
-                if aprob != True :
+                pos = lookForLocals(nombreLocal, "nombre")      #busqueda verificando que no existe otro local con el mismo nombre
+                if pos != -1 :
                     cont+= 1                        
                 else:
                     repetido("el nombre")
@@ -1021,8 +1023,8 @@ def borrar():
             borrar = input("ingrese el codigo del local a borrar: ")
             
             if borrar != '*':
-                condi, pos = lookForLocals(borrar, "codigoLocal")
-                if condi != False :
+                pos = lookForLocals(borrar, "codigoLocal")
+                if pos != -1 :
                     local = LOCALES()
                     aflocales.seek(pos, 0)
                     local = pickle.load(aflocales)
@@ -1133,18 +1135,66 @@ def elecciones_op4(opcion):  # acciones del sub menu 4 del perfil de administrad
 
 
 def aprobar_denegar_desc():
-    global afpromo, alpromo
+    global afpromo, alpromo,aflocales, dias
     tam = os.path.getsize(afpromo)
     code = -1
     if tam > 0:
         while   code != 0:
-            promos_pendientes()
+            os.system("cls")
+            show_promos("pendiente")
             code = input("Ingrese el codigo del local para aprobar o denegar su solicitud de descuesto: ")
-            condicional, pos = lookForPromo(code, "local")
-            
+            pos = lookForPromo(code, "local")
+            if pos != -1:
+                os.system("cls")
+                alpromo.seek(pos,0)
+                aux = PROMOCIONES()
+                aux_local = LOCALES()
+                    
+                aux = pickle.load(alpromo)
+                pos = lookForLocals(aux.codLocal, "code")
+                aflocales.seek(pos,0)
+                aux_local = pickle.load(aflocales)        
+                print("Promocion Nro ",aux.codPromo)           
+                print(f"\nLocal:\n{aux.codLocal} {aux_local.nombreLocal}")
+                            
+                print ("Desde                     ",end="")
+                print ("Hasta                     ",end="") 
+                print ("estado                    ",end="") 
+                            
+                spaces = " " * (25 - len(aux.fechaDesdePromo))
+                print (str(aux.fechaDesdePromo),spaces, end="")
+                            
+                spaces = " " * (25 - len(aux.fechaHastaPromo))
+                print (aux.fechaHastaPromo,spaces, end="")
+                            
+                spaces = " " * (25 - len(aux.estado))
+                print (aux.estado.capitalize(),spaces)
+                            
+                print ("Promocion: ")
+                            
+                print (aux.textoPromo.capitalize())
+                            
+                print ("dias habiles: ",end="")
+                for i in range(0,7):
+                    if aux.diasSemana != 0:
+                        print (f"{dias[i]}, ", end="")
+                
+                pregunta = "Desea aceptar la solicitud?"
+                answer = ask_continue(pregunta)
+                if answer != "n":
+                    aux.estado = "aceptada"
+                else:
+                    aux.estado = "rechazada"
+                
+                alpromo.seek(pos,0)
+                pickle.dump(aux,alpromo)
+                alpromo.flush 
+    else: 
+        os.system("cls") 
+        print("----- No existen promociones -----")         
+        msvcrt.getch()
 
-
-def promos_pendientes():
+def show_promos(tipo):
     global afpromo, alpromo, aflocales, dias
 
     print ("Presione culaquier tecla para continuar\n")
@@ -1155,38 +1205,101 @@ def promos_pendientes():
          
     while alpromo.tell() < tam:
         aux = pickle.load(alpromo)
-        if aux.estado.strip() == "pendiente":
-            condi_no_use, pos = lookForLocals(aux.codLocal, "code") 
-            aflocales.seek(pos,0)
-            aux_local = pickle.load(aflocales)        
+        if aux.estado.strip() == tipo:
+            pos = lookForLocals(aux.codLocal, "code")
+            if pos != -1: 
+                aflocales.seek(pos,0)
+                aux_local = pickle.load(aflocales)        
+                print("Promocion Nro ",aux.codPromo)
+                print(f"\nLocal:\n{aux.codLocal} {aux_local.nombreLocal}")
+                
+                print ("Desde                     ",end="")
+                print ("Hasta                     ",end="") 
+                print ("estado                    ",end="") 
+                
+                spaces = " " * (25 - len(aux.fechaDesdePromo))
+                print (str(aux.fechaDesdePromo),spaces, end="")
+                
+                spaces = " " * (25 - len(aux.fechaHastaPromo))
+                print (aux.fechaHastaPromo,spaces, end="")
+                
+                spaces = " " * (25 - len(aux.estado))
+                print (aux.estado.capitalize(),spaces)
+                
+                print ("Promocion ")
+                
+                print (aux.textoPromo.capitalize())
+                
+                print ("dias habiles: ",end="")
+                for i in range(0,7):
+                    if aux.diasSemana != 0:
+                        print (f"{dias[i]}, ", end="")
             
-            print(f"\nLocal:\n{aux.codLocal} {aux_local.nombreLocal}")
-            
-            print ("Desde                     ",end="")
-            print ("Hasta                     ",end="") 
-            print ("estado                    ",end="") 
-            
-            spaces = " " * (25 - len(aux.fechaDesdePromo))
-            print (str(aux.fechaDesdePromo),spaces, end="")
-            
-            spaces = " " * (25 - len(aux.fechaHastaPromo))
-            print (aux.fechaHastaPromo,spaces, end="")
-            
-            spaces = " " * (25 - len(aux.estado))
-            print (aux.estado.capitalize(),spaces)
-            
-            print ("Promocion: ")
-            
-            print (aux.textoPromo.capitalize())
-            
-            print ("dias habiles: ",end="")
-            for i in range(0,7):
-                if aux.diasSemana != 0:
-                    print (f"{dias[i]}, ", end="")
-        
 
 def reporte_desc():
-    
+    global afpromo, alpromo, aflocales, dias
+    answer = "s"
+    cont = 0
+    while answer != "n":
+        os.system('cls')
+        print("Buscando promociones desde ")
+        desde = get_fecha()
+        os.system('cls')
+        print(f"Buscando promociones desde: {desde} hasta ")
+        hasta = get_fecha()
+        if desde <= hasta:
+            os.system('cls')
+            print(f"Buscando promociones desde: {desde} hasta {hasta}\n")
+               
+            alpromo.seek(0,0)
+            tam = os.path.getsize(afpromo)
+            aux = PROMOCIONES()
+            aux_local = LOCALES()
+         
+            while alpromo.tell() < tam:
+                aux = pickle.load(alpromo)
+                if aux.estado.strip() == "aceptada" and desde >= aux.fechaDesdePromo and hasta <= aux.fechaHastaPromo :
+                    pos = lookForLocals(aux.codLocal, "code")
+                    if pos != -1: 
+                        aflocales.seek(pos,0)
+                        aux_local = pickle.load(aflocales)        
+                        
+                        print("Promocion Nro. ",aux.codPromo)
+                        print(f"\nLocal:\n{aux.codLocal} {aux_local.nombreLocal}")
+                        
+                        print ("Desde                     ",end="")
+                        print ("Hasta                     ",end="") 
+                        print ("estado                    ",end="") 
+                        
+                        spaces = " " * (25 - len(aux.fechaDesdePromo))
+                        print (str(aux.fechaDesdePromo),spaces, end="")
+                        
+                        spaces = " " * (25 - len(aux.fechaHastaPromo))
+                        print (aux.fechaHastaPromo,spaces, end="")
+                        
+                        spaces = " " * (25 - len(aux.estado))
+                        print (aux.estado.capitalize(),spaces)
+                        
+                        print ("Promocion: ")
+                        
+                        print (aux.textoPromo.capitalize())
+                        
+                        print ("dias habiles: ",end="")
+                        for i in range(0,7):
+                            if aux.diasSemana != 0:
+                                print (f"{dias[i]}, ", end="") 
+                                
+                        #falta parte de USO_PROMOCIONES.dat 
+                               
+                        cont += 1
+            if cont == 0:
+                os.system("cls")
+                ("----- No existen promociones activas en el rango de fecha -----")
+                msvcrt.getch()
+    answer = ask_continue("desea realizar otro report? ")
+        
+            
+                       
  
 def opcion_erronea():  # exhibiendo que la opcion tipeada fue erronea
     os.system("cls")
@@ -1219,32 +1332,7 @@ def precarga(): #precarga de los datos de las cuentas
     #formatear(b)
         
     pickle.dump(b,afusuarios)
-    afusuarios.flush()
-
-             
-def busqueda(dato,limraw, limcolumn, dato_buscar, retorno): #busqueda secuencial bidimensional
-    fila = 0
-    condicional = False
-    while condicional != True and fila <= limraw :
-        column = 0
-        while condicional != True and column <= limcolumn:
-            if dato_buscar == dato[column][fila]:
-                if retorno == 'fila':
-                    return fila
-                else:
-                    return True
-            elif dato[0][fila] == 0:
-                if retorno == 'fila':
-                    return fila
-                else:
-                    return False
-            else:
-                column += 1
-        fila += 1
-    
-    print ("Memoria llena")
-    return 
-
+    afusuarios.flush() 
             
 # def busq_dico()              
 
@@ -1378,13 +1466,22 @@ def formatear_locales(x):
 # programa principal
 os.system("cls")
 
-afpromo = './PROMOCIONES.dat'
+if not(os.path.exists("./tp3")):
+    os.mkdir("./tp3")
+
+afUsoPromo = './tp3/USO_PROMOCIONES.dat'
+if not(os.path.exists(afUsoPromo)):
+    alUsoPromo = open(afUsoPromo, "w+b")
+else:
+    alUsoPromo = open(afUsoPromo, "r+b")
+
+afpromo = './tp3/PROMOCIONES.dat'
 if not(os.path.exists(afpromo)):
     alpromo = open(afpromo, "w+b")
 else:
     alpromo = open(afpromo, "r+b")
 
-urlusuarios = "./USUARIOS.dat"
+urlusuarios = "./tp3/USUARIOS.dat"
 if not(os.path.exists(urlusuarios)):
     afusuarios = open(urlusuarios, "w+b")
     precarga()
@@ -1392,7 +1489,7 @@ else:
     afusuarios = open(urlusuarios, "r+b")
 
 
-urllocales = "./LOCALES.dat"
+urllocales = "./tp3/LOCALES.dat"
 if not (os.path.exists(urllocales)):
     aflocales = open (urllocales, "w+b")
 else:
@@ -1405,4 +1502,5 @@ validar_inicio()
 
 afusuarios.close()
 aflocales.close()
-afpromo.close()
+alpromo.close()
+alUsoPromo.close()
