@@ -397,16 +397,156 @@ def crear_descuento():
         loc = lookForPromo(i, 'local')
         #Verifico si el local tiene promociones:
         if loc != -1:
-            promos = verify_promos(i, datetime.date.today, datetime.date.today, False)
+            promos = verify_promos(i, datetime.date.today, datetime.date.today, True)
             if promos.length() > 0:
                 print('El local: ', i, 'tiene las siguientes promociones disponibles: ')
                 for j in promos:
-                    print(j)
+                    print(j, '. Estado: aprobado.')
             else:
                 print('El local: ', i, 'no tinene ninguna promoción disponible en este momento')
         else:
             print('El local ', i, ' no tiene promociones')
+    # Creación de descuentos
 
+    filelf = PROMOCIONES()
+    print('Ingrese la feha desde la que la promoción estará habilitada: ')
+    fd = get_fecha()
+    print('Ingrese la feha hasta la que la promoción estará habilitada: ')
+    fh = get_fecha()
+    cl = verify_cl()
+    cp = generar_codp()
+    txt = input('Ingrese texto de promoción: ')
+    print('A continuación se le consultará acerca de los dias en los cuales la promoción será válida.')
+    dias = get_dias()
+
+    alpromo.seek(0.2)
+    filelf.textoPromo = txt
+    filelf.fechaDesdePromo = fd
+    filelf.fechaHastapromo = fh
+    filelf.diasSemana = dias
+    filelf.codLocal = cl
+    filelf.estado = 'P'
+
+    pickle.dump(filelf, alpromo)
+    print('Promoción generada correctamente')
+
+def generar_codp():
+    tam = os.path.getsize(afpromo)
+    alpromo.seek(afpromo)
+    filelf = PROMOCIONES()
+    r = filelf.codPromo
+
+    r = r+1
+    return r
+
+def get_dias():
+    for i in range(0, 7):
+        match i:
+            case '0':
+                q = False
+                while q != True:
+                    l = input('La promoción estará activa los lunes? (s/n)')
+                    if l == 'n' or l == 's':
+                        q = True
+                        if l == 's':
+                            l = 1
+                        else:
+                            l == 0
+            case '1':
+                q = False
+                while q != True:
+                    m = input('La promoción estará activa los martes? (s/n)')
+                    if m == 'n' or m == 's':
+                        q = True
+                        if m == 's':
+                            m = 1
+                        else:
+                            m == 0
+            case '2':
+                q = False
+                while q != True:
+                    mi = input('La promoción estará activa los miercoles? (s/n)')
+                    if mi == 'n' or mi == 's':
+                        q = True
+                        if mi == 's':
+                            mi = 1
+                        else:
+                            mi == 0
+            case '3':
+                q = False
+                while q != True:
+                    j = input('La promoción estará activa los jueves? (s/n)')
+                    if j == 'n' or j == 's':
+                        q = True
+                        if j == 's':
+                            j = 1
+                        else:
+                            j == 0
+            case '4':
+                q = False
+                while q != True:
+                    v = input('La promoción estará activa los viernes? (s/n)')
+                    if v == 'n' or v == 's':
+                        q = True
+                        if v == 's':
+                            v = 1
+                        else:
+                            v == 0
+            case '5':
+                q = False
+                while q != True:
+                    s = input('La promoción estará activa los sabados? (s/n)')
+                    if s == 'n' or s == 's':
+                        q = True
+                        if s == 's':
+                            s = 1
+                        else:
+                            s == 0
+            case '6':
+                q = False
+                while q != True:
+                    d = input('La promoción estará activa los domingos? (s/n)')
+                    if d == 'n' or d == 's':
+                        q = True
+                        if d == 's':
+                            d = 1
+                        else:
+                            d == 0
+        a = [l, m, mi, j, v, s, d]
+
+        return a
+                
+def verify_cl(name):
+    q = False
+
+    while q != False:
+        cd = int(input('Ingrese el código del local al que desea aplicarle el descuento'))
+        n = lookForLocals(cd, "codigoLocal")
+        e = lookForLocals(cd, "estado")
+        od  = lookForLocals(cd, "codUsuario")
+        vod = verify_duen(name, od)
+
+        if n == -1:
+            print('Código de local inválido, vuelva a ingresarlo.')
+        elif e == -1:
+            print('El local al cual usted desea aplicarle el descuento no está activo. Intentelo nuevamente.')
+        elif vod == False:
+            print('El local que usted está intentando modificar no le pertenece')
+        else:
+            q = True
+    return cd
+
+def verify_duen(nom, pun):
+    global aflocales, urllocales
+    condicional = False
+    aflocales.seek(pun)
+    filelf = LOCALES()
+
+    filelf = pickle.load(aflocales)
+    if filelf.codUsuario == nom:
+        condicional == True
+        
+    return condicional
 def verify_promos(x, desde, hasta, e):
     # El parámetro 'e' indica si el estado ha de discriminarse o no
     global afpromo, alpromo
@@ -416,25 +556,25 @@ def verify_promos(x, desde, hasta, e):
     pr = []
 
     while alpromo.tell() < tam:
-        before = alpromo.tell()
         filelf = pickle.load(alpromo)
         if filelf.codLocal == x:
             ## Verifico la fecha
-            if filelf.fechaDesdePromo <= desde  and filelf.fechaHastaPromo >= hasta:
+            if filelf.fechaDesdePromo <= desde and filelf.fechaHastaPromo >= hasta:
                 if e == True:
                    if filelf.estado == 'A':
-                       pr.push(before)
+                       pr.push(filelf.codPromo)
                 else: 
-                    pr.push(before)
-    #Retorna los indices de las promociones activas y/o aprobadas del local del local
+                    pr.push(filelf.codPromo)
+    #Retorna los codigos de las promociones activas y/o aprobadas del local del local
     return pr
 
 def reporte_desc():
+    # nombre = usr puede ser un error. corroborar cuando se testee
     global nombre    
     # Busco el nombre y los indices de los locales del dueño logueado
     pos = lookForUser(nombre, "nombre")
-    # arreglar para que funcione con la pocision
-    due_locals = manyLocals(index[1])
+    # arreglar para que funcione con la posicion
+    due_locals = manyLocals(pos)
 
     print('Ingrese la primer fecha del rango deseado: ')
     desde = get_fecha()
@@ -447,15 +587,39 @@ def reporte_desc():
 
     for i in due_locals.length():
         exh_nombre(due_locals[i])
-        verificadas = verify_promos(due_locals[i])
+        verificadas = verify_promos(due_locals[i], desde, hasta, True)
         for j in verificadas.length():
-            usos = sacar_usos()
-            ## A terminar: mostrar los datos requeridos
+            usos = sacar_usos(verificadas[j], desde, hasta)
+            txt = lookForPromo(verificadas[j], "texto")
+            fd = lookForPromo(verificadas[j], "fechaDesdePromo")
+            fh = lookForPromo(verificadas[j], "fechaHastaPromo")
+            print('Codigo de promoción: ', verificadas[j])
+            print('Texto: ', txt)
+            print('Fecha desde: ', fd)
+            print('Fecha desde: ', fh)
+            print('Usos: ', usos)
+            print('                                ')
 
-def exh_nombre():
-    True
-def sacar_usos():
-    True
+    
+
+def exh_nombre(codloc):
+    p = lookForLocals(codloc, 'nombre')
+    c = lookForLocals(codloc, 'codigoLocal')
+    print('Nombre del local: ', p)
+    print('Codigo del local', c)
+
+def sacar_usos(cod, d, h):
+    global afUsoPromo, alUsoPromo
+    alUsoPromo.seek(0,0)
+    tam = os.path.getsize(afUsoPromo)
+    filelf = USO_PROMOCIONES()
+    acum = 0
+    
+    while alpromo.tell() <tam:
+        filelf = pickle.load(alUsoPromo)
+        if filelf.codPromo == cod and filelf.fechaUsoPromo >= d and filelf.fechaHasta <= h:
+                acum = acum + 1
+    return acum
     
 
 def get_fecha():
@@ -494,10 +658,11 @@ def manyLocals(cod):
         filelf = pickle.load(aflocales)
         attr_comparar = filelf.codUsuario.strip()
 
-        if attr_comparar == cod:
-            codigos = codigos.push(aflocales[before].codLocales)                
+        if attr_comparar == cod and filelf.estado == 'A':
+            codigos = codigos.push(filelf.codLocales)                
     return codigos
 
+## Me parece que no se va a terminar usando. BORRAR
 def manyDescs(cod):
     global alpromo, afpromo
     alpromo.seek(0,0)
@@ -512,7 +677,7 @@ def manyDescs(cod):
         attr_comparar = filelf.codLocal.strip()
 
         if attr_comparar == cod:
-            codigos = codigos.push(aflocales[before].codLocales)                
+            codigos = codigos.push(filelf.codPromo)                
     return codigos
 
 def gestion_descuentos (): #submenu de una sesion de duenos
