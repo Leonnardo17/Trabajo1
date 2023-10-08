@@ -33,6 +33,7 @@ dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"
 # Nombre del local logueado
 usr = ""
 localesDueño = []
+habiles = [0] * 7 
 
 
 class USUARIOS():
@@ -249,27 +250,72 @@ def val_menu_client(condicional): #validacion de opciones del menu para clientes
         else:
             os.system("cls")
             condicional = elecciones_client(opcion)
-    
 
+def ValidarEntero(x):
+    try:
+        int(x)
+    except: return True
+     
+def buscarCOD(x):
+    global afpromo, alpromo
+    t = os.path.getsize(afpromo)
+    vrtemp = PROMOCIONES()
+    encontrado = False
+    alpromo.seek(0,0)
+    while alpromo.tell() < t and not encontrado:
+        pos = alpromo.tell()
+        vrtemp = pickle.load(alpromo)
+        if vrtemp.codLocal == x:
+            encontrado = True    
+    if encontrado:
+        return pos
+    else:
+        return -1
+    
+def buscarPromos(c,f):
+    global afpromo, alpromo
+    tam = os.path.getsize(afpromo)
+    vrtemp = PROMOCIONES()
+    vrtemp = pickle.load(alpromo)
+    alpromo.seek(0, 0)
+    while vrtemp.tell() < tam:
+        if vrtemp.codLocal == c and vrtemp.estado == "A" and vrtemp.fechaDesdePromo <= f.date() <= vrtemp.fechaHastaPromo:
+            for i in range(6):
+                if vrtemp.diasSemana[i] == 1:
+                    encabezado = " "
+                    encabezado += "{:<15}".format("Codigo Promo")
+                    encabezado += "{:<40}".format("Texto")
+                    encabezado += "{:<20}".format("Fecha desde")
+                    encabezado += "{:<10}".format("Fecha hasta")
+                    print(encabezado)
+                    print("----------------------------------------------------------------------------------")
+                    salida = " "
+                    salida += "{:<15}".format(vrtemp.codPromo.strip())
+                    salida += "{:<40}".format(vrtemp.textoPromo.strip())
+                    salida += "{:<20}".format(vrtemp.fechaDesdePromo.strip())
+                    salida += "{:<10}".format(vrtemp.fechaHastaPromo.strip())
+                    print(salida)
+        vrtemp = pickle.load(alpromo)
 
 def buscarDescuentos():
     global alpromo, afpromo
-    ok = False
-    factual = datetime.now()
-    factual = factual.strftime("%d/%m/%Y")
-    while True:
+    fecha_valida = False
+    cod = print("Ingrese el codigo del local")
+    while ValidarEntero:
+        cod = input("Incorrecto, intente de nuevo")
+    cod = int(cod)
+    while not fecha_valida:
+        fecha = input("Ingresa una fecha (dd/mm/aaaa): ")
         try:
-            cod = int(input("Ingresa el codigo de local: "))
+            fecha_obj = datetime.datetime.strptime(fecha, "%d/%m/%Y")
+            if fecha_obj.date() >= datetime.datetime.now().date():
+                    fecha_valida = True
+            else:
+                print("La fecha ingresada debe ser igual o posterior a la fecha actual.")
         except ValueError:
-            print("Incorrecto, ingrese un codigo valido")
-        
-    
-    
-        
-        
-        
-    
-        
+            print("Formato de fecha incorrecto. Intente de nuevo (dd/mm/aaaa): ")
+    buscarPromos(cod, fecha)
+         
         
     
 def val_descuento(promocion):
@@ -308,10 +354,6 @@ def elecciones_client(opcion):  #elecciones del cliente (por construir)
         case "3":
             # codigo_promo = input("Ingrese el codigo de la promocion: ")
             # solicitar_descuento(cliente_logueado, codigo_promo, promociones)
-            en_contruccion()
-            return True
-
-        case "4":
             en_contruccion()
             return True
 
@@ -385,6 +427,7 @@ def elecciones_owner(opcion): #elecciones para el menu de duenos (por construir)
             return False
         
 def crear_descuento():
+    global habiles
     nombre = usr
     # Busco el nombre del usuario logueado:
     index = lookForUser(nombre, "nombre")
@@ -417,13 +460,13 @@ def crear_descuento():
     cp = generar_codp()
     txt = input('Ingrese texto de promoción: ')
     print('A continuación se le consultará acerca de los dias en los cuales la promoción será válida.')
-    dias = get_dias()
+    get_dias()
 
     alpromo.seek(0.2)
     filelf.textoPromo = txt
     filelf.fechaDesdePromo = fd
     filelf.fechaHastapromo = fh
-    filelf.diasSemana = dias
+    filelf.diasSemana = habiles
     filelf.codLocal = cl
     filelf.estado = 'P'
 
@@ -440,6 +483,24 @@ def generar_codp():
     return r
 
 def get_dias():
+    global habiles, dias
+    cont = 0
+    while cont == 0:
+        print("----- Ingresando Dias Habiles -----")
+        print("--- Debe ingresar por lo menos un dia ---")
+        print("--- Si no ingresa ningun dia habil se le pedira reingresar todos los campos ---")
+        for i in range (0,7):
+            
+            while l != 'n' and l != 's':
+                    l = input(f'La promoción estará activa los {dias[i]}? (s/n)')
+                    
+        if l != 's':
+            habiles[i] = 0
+            cont +=1
+        else:
+            habiles[i] == 1
+    
+    
     for i in range(0, 7):
         match i:
             case '0':
