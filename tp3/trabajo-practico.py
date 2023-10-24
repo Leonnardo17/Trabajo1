@@ -259,23 +259,25 @@ def validarEntero(x):
     except: 
         return True
         
-def buscarPromos(c,f):
+def buscarPromos(c,f,w):
     global afpromo, alpromo, dias
     tam = os.path.getsize(afpromo)
     vrtemp = PROMOCIONES()
     alpromo.seek(0, 0)
     cont = 0
     codi = True
+    os.system("cls")
+    encabezado = " "
+    encabezado += "{:<15}".format("Codigo Promo")
+    encabezado += "{:<40}".format("Texto")
+    encabezado += "{:<20}".format("Fecha desde")
+    encabezado += "{:<10}".format("Fecha hasta")
+    print(encabezado)
     while alpromo.tell() < tam and codi != False:  ###cambiado
         try:
             vrtemp = pickle.load(alpromo)
-            if vrtemp.codLocal.strip() == c and vrtemp.estado.strip() == "aprobada" and int(vrtemp.diasSemana[f].strip()) == 1:
-                        encabezado = " "
-                        encabezado += "{:<15}".format("Codigo Promo")
-                        encabezado += "{:<40}".format("Texto")
-                        encabezado += "{:<20}".format("Fecha desde")
-                        encabezado += "{:<10}".format("Fecha hasta")
-                        print(encabezado)
+
+            if vrtemp.codLocal.strip() == c and vrtemp.estado.strip() == "aprobada" and int(vrtemp.diasSemana[w].strip()) == 1 and vrtemp.fechaDesdePromo <= str(f) <= vrtemp.fechaHastaPromo  :
                         print("----------------------------------------------------------------------------------------------------------------")
                         salida = " "
                         salida += "{:<15}".format(vrtemp.codPromo.strip())
@@ -284,14 +286,16 @@ def buscarPromos(c,f):
                         salida += "{:<10}".format(vrtemp.fechaHastaPromo.strip())
                         print(salida)
                         cont += 1
-                        print("--- Presione cualquier tecla para continuar ----")
-                        msvcrt.getch()
+                        
         except:
             codi = False
-            
+        
+        
     if cont == 0:
+        os.system("cls")
         print("---- No existen promociones del local ingresado en la fecha ingresada ----")
-        msvcrt.getch()
+        
+    msvcrt.getch()
         
 
 def buscarDescuentos():
@@ -309,8 +313,8 @@ def buscarDescuentos():
         if cod != "0":
             os.system("cls")
             fecha = get_fecha()
-            fecha = fecha.weekday()
-            buscarPromos(cod, fecha)
+            week = fecha.weekday()
+            buscarPromos(cod, fecha,week)
          
         
 def val_descuento(promocion):
@@ -594,6 +598,9 @@ def verify_cl():  #cambiado
     aux = LOCALES()
     while q != False:
         os.system("cls")
+        answer = ask_continue("desea ver sus locales?")
+        if answer == "s":
+            ver_locales_logged()
         cd = input('Ingrese el código del local al que desea aplicarle el descuento: ')
         while validarEntero(cd):
             cd = input('Ingrese el código del local al que desea aplicarle el descuento: ')
@@ -652,11 +659,10 @@ def reporte_desc_owner():
     # Busco el nombre y los indices de los locales del dueño logueado
    
     # arreglar para que funcione con la posicion
-    hoy = datetime.date.today()
-    fd = get_fecha()
+    
     
     os.system("cls")
-    print('Ingrese la feha desde la que la promoción estará habilitada: ')
+    print('Ingrese la feha desde el inicio del reporte: ')
     fd = get_fecha()
     print('Ingrese la feha hasta la que la promoción estará habilitada: ')
     fh = get_fecha()
@@ -678,7 +684,6 @@ def reporte_desc_owner():
     aux_uso = USO_PROMOCIONES()
     tam_local = os.path.getsize(urllocales)
     tam_promo = os.path.getsize(afpromo)
-    hoy = str(datetime.date.today())
     cont = 0
     
     tam_usos = os.path.getsize(afUsoPromo)
@@ -721,12 +726,19 @@ def reporte_desc_owner():
                     
                     print (aux_promo.textoPromo.capitalize())
                     
-                    print ("dias habiles: ",end="")
+                    print ("dias habiles: - ",end="")
+                    slash = 0
                     for i in range(0,7):
                         if int(aux_promo.diasSemana[i]) != 0:
-                            print (f"{dias[i]}, ", end="")
+                            if slash == 0:
+                                print (f"{dias[i]} ", end="")
+                                slash += 1
+                            else:
+                                print (f"- {dias[i]} ", end="")
                     
-                    print(f"\nUsos: {cont_usos}\n\n")
+                    print(f"\nUsos: {cont_usos}\n")
+                    
+                    print("------------------------------------------------------")
                     
                     cont +=1
                     msvcrt.getch()
@@ -782,7 +794,7 @@ def get_fecha():
             print('Fecha inválida')
             a = input('Año: ')
         a = int(a)
-        if a >= datetime.date.today().year:
+        if a >= 2000 and a < 9999:
             q = True
     des = datetime.date(a, m, d)
     return des
@@ -1446,6 +1458,10 @@ def aprobar_denegar_desc():
         while   code != "0":
             os.system("cls")
             show_promos("pendiente")
+            answer = ask_continue("desea ver los locales? ")
+            if answer == 's':
+                ver_locales("cliente")
+            os.system("cls")
             print("ingresando 0 sale")
             code = input("Ingrese el codigo del local para aprobar o denegar su solicitud de descuesto: ")
             if code != "0":
@@ -1511,7 +1527,6 @@ def show_promos(tipo):
     aux_local = LOCALES()
          
     while alpromo.tell() < tam:
-        try:
             aux = pickle.load(alpromo)
             if aux.estado.strip() == tipo:
                 pos = lookForLocals(aux.codLocal, "code")
@@ -1540,40 +1555,9 @@ def show_promos(tipo):
                     
                     print ("dias habiles: ",end="")
                     for i in range(0,7):
-                        if aux.diasSemana != "0":
+                        if int(aux.diasSemana[i]) != "0":
                             print (f"{dias[i]}, ", end="")
-        except:
-            return
-            
-        if aux.estado.strip() == tipo:
-            pos = lookForLocals(aux.codLocal, "code")
-            if pos != -1: 
-                aflocales.seek(pos,0)
-                aux_local = pickle.load(aflocales)        
-                print("Promocion Nro ",aux.codPromo)
-                print(f"\nLocal:\n{aux.codLocal} {aux_local.nombreLocal}")
-                
-                print ("Desde                     ",end="")
-                print ("Hasta                     ",end="") 
-                print ("estado                    ") 
-                
-                spaces = " " * (25 - len(str(aux.fechaDesdePromo)))
-                print (str(aux.fechaDesdePromo),spaces, end="")
-                
-                spaces = " " * (25 - len(str(aux.fechaHastaPromo)))
-                print (aux.fechaHastaPromo,spaces, end="")
-                
-                spaces = " " * (25 - len(aux.estado))
-                print (aux.estado.capitalize(),spaces)
-                
-                print ("Promocion ")
-                
-                print (aux.textoPromo.capitalize())
-                
-                print ("dias habiles: ",end="")
-                for i in range(0,7):
-                    if aux.diasSemana != 0:
-                        print (f"{dias[i]}, ", end="")
+         
             
 
 def reporte_desc():
@@ -1649,10 +1633,15 @@ def reporte_desc():
                     
                     print (aux_promo.textoPromo.capitalize())
                     
-                    print ("dias habiles: ",end="")
+                    print ("dias habiles: - ",end="")
+                    slash = 0
                     for i in range(0,7):
                         if int(aux_promo.diasSemana[i]) != 0:
-                            print (f"{dias[i]}, ", end="")
+                            if slash == 0:
+                                print (f"{dias[i]} ", end="")
+                                slash += 1
+                            else:
+                                print (f"- {dias[i]} ", end="")
                     
                     print(f"\nUsos: {cont_usos}\n")
                     
@@ -1755,27 +1744,28 @@ def ver_locales(tipo):  #print en pantalla de la tabla de locales
         
         while aflocales.tell() < tam:
             aux = pickle.load(aflocales)
-            print("")
-            
-            spaces = " " * (25 - len(str(aux.codLocal)))
-            print (str(aux.codLocal).capitalize(),spaces, end="")
-            
-            spaces = " " * (25 - len(aux.nombreLocal))
-            print (aux.nombreLocal.capitalize(),spaces, end="")
-            
-            spaces = " " * (25 - len(aux.ubicacionLocal))
-            print (aux.ubicacionLocal.capitalize(),spaces, end="")
-            
-            spaces = " " * (25 - len(aux.rubroLocal))
-            print (aux.rubroLocal.capitalize(),spaces, end="")
-            if tipo != "cliente":
-                spaces = " " * (25 - len(str(aux.codUsuario)))
-                print (str(aux.codUsuario).capitalize(),spaces, end="")
-            
-            spaces = " " * (25 - len(aux.estado))
-            print (aux.estado.capitalize(),spaces, end="")
-            
+            if not(aux.estado == "B" and tipo == "cliente"):
+                print("")
                 
+                spaces = " " * (25 - len(str(aux.codLocal)))
+                print (str(aux.codLocal).capitalize(),spaces, end="")
+                
+                spaces = " " * (25 - len(aux.nombreLocal))
+                print (aux.nombreLocal.capitalize(),spaces, end="")
+                
+                spaces = " " * (25 - len(aux.ubicacionLocal))
+                print (aux.ubicacionLocal.capitalize(),spaces, end="")
+                
+                spaces = " " * (25 - len(aux.rubroLocal))
+                print (aux.rubroLocal.capitalize(),spaces, end="")
+                if tipo != "cliente":
+                    spaces = " " * (25 - len(str(aux.codUsuario)))
+                    print (str(aux.codUsuario).capitalize(),spaces, end="")
+                
+                spaces = " " * (25 - len(aux.estado))
+                print (aux.estado.capitalize(),spaces, end="")
+                
+                    
         print ("\n\n\nA = Local activo   B = Local dado de baja")
         msvcrt.getch() #esta funcion pausa el sistema hasta que el operador tipee cualquier letra
         os.system("cls")
@@ -1784,7 +1774,58 @@ def ver_locales(tipo):  #print en pantalla de la tabla de locales
         print ("presione cualquier tecla para continuar\n")
         msvcrt.getch()
         os.system("cls")
-    
+
+def ver_locales_logged():
+    global aflocales, urllocales, max_locales, user
+    max_locales = cuentaLocales()
+    if max_locales != 0:
+        print ("Presione culaquier tecla para continuar\n")
+        aflocales.seek(0,0)
+        tam = os.path.getsize(urllocales)
+        aux = LOCALES()
+        
+        #Encabezado
+        print ("Codigo Local              ",end="")
+        print ("Nombre                    ",end="") 
+        print ("Ubicacion                 ",end="")
+        print ("Rubro                     ",end="")
+        print ("Codigo dueño              ",end="")
+        print ("Estado                    ",end="")
+        
+        while aflocales.tell() < tam:
+            aux = pickle.load(aflocales)
+            if int(user.codUsuario) == int(aux.codUsuario.strip()):
+                print("")
+                
+                spaces = " " * (25 - len(str(aux.codLocal)))
+                print (str(aux.codLocal).capitalize(),spaces, end="")
+                
+                spaces = " " * (25 - len(aux.nombreLocal))
+                print (aux.nombreLocal.capitalize(),spaces, end="")
+                
+                spaces = " " * (25 - len(aux.ubicacionLocal))
+                print (aux.ubicacionLocal.capitalize(),spaces, end="")
+                
+                spaces = " " * (25 - len(aux.rubroLocal))
+                print (aux.rubroLocal.capitalize(),spaces, end="")
+                
+                spaces = " " * (25 - len(str(aux.codUsuario)))
+                print (str(aux.codUsuario).capitalize(),spaces, end="")
+                
+                spaces = " " * (25 - len(aux.estado))
+                print (aux.estado.capitalize(),spaces, end="")
+                
+                    
+        print ("\n\n\nA = Local activo   B = Local dado de baja")
+        msvcrt.getch() #esta funcion pausa el sistema hasta que el operador tipee cualquier letra
+        os.system("cls")
+    else:
+        print ("-- no se ha ingresado ningun local al sistema ---\n")  #este aviso aparece cuando no se ha introdido ningun local
+        print ("presione cualquier tecla para continuar\n")
+        msvcrt.getch()
+        os.system("cls")
+
+ 
 def verif_num(str):
     special = True
     if len(str) > 1:
@@ -1820,7 +1861,7 @@ def formatear(b):
 
 
 def formatear_locales(x):
-     x.codLocal = str(x.codLocal) 
+     x.codLocal = str(x.codLocal).ljust(3,' ') 
      x.codLocal = x.codLocal.ljust(3," ") 
      x.nombreLocal = str(x.nombreLocal).ljust(15, " ") 
      x.ubicacionLocal = str(x.ubicacionLocal).ljust(15," ")
