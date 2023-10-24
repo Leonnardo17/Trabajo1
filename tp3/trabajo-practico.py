@@ -218,7 +218,7 @@ def validar_usuario(condicional):  # ingreso seguro de la contra asi como valida
                 else:
                     condicional = val_menu_client(condicional)
                 
-        elif i > 1:
+        if i > 1:
             i = i - 1
             os.system("cls")
             print("Tiene", i, "cantidad de intentos restantes")
@@ -269,14 +269,14 @@ def buscarPromos(c,f):
     while alpromo.tell() < tam and codi != False:  ###cambiado
         try:
             vrtemp = pickle.load(alpromo)
-            if vrtemp.codLocal.strip() == c and vrtemp.estado == "A" and int(vrtemp.diasSemana[f].strip()) == 1:
+            if vrtemp.codLocal.strip() == c and vrtemp.estado.strip() == "aprobada" and int(vrtemp.diasSemana[f].strip()) == 1:
                         encabezado = " "
                         encabezado += "{:<15}".format("Codigo Promo")
                         encabezado += "{:<40}".format("Texto")
                         encabezado += "{:<20}".format("Fecha desde")
                         encabezado += "{:<10}".format("Fecha hasta")
                         print(encabezado)
-                        print("----------------------------------------------------------------------------------")
+                        print("----------------------------------------------------------------------------------------------------------------")
                         salida = " "
                         salida += "{:<15}".format(vrtemp.codPromo.strip())
                         salida += "{:<40}".format(vrtemp.textoPromo.strip())
@@ -346,9 +346,9 @@ def solicitar_descuento():
             filepr = pickle.load(alpromo)
             hoy = str(datetime.date.today())
             estado = filepr.estado.strip()
-            dia = str(filepr.diasSemana[dds]).strip()
+            dia = int(filepr.diasSemana[dds])
             ## Fechas
-            if filepr.fechaDesdePromo <= hoy and hoy <= filepr.fechaHastaPromo and estado == 'aprobada' and  dia == "1":  ###cambiado
+            if filepr.fechaDesdePromo.strip() <= hoy and hoy <= filepr.fechaHastaPromo.strip() and estado == 'aprobada' and  dia == 1:  ###cambiado
                 condicional = True
 
             ######## Dump ########
@@ -356,7 +356,9 @@ def solicitar_descuento():
                 fileup.fechaUsoPromo = datetime.date.today()
                 fileup.codCliente = user.codUsuario #cambiado
                 fileup.codPromo = cod
+                formatear_uso_promo(fileup)
                 pickle.dump(fileup, alUsoPromo)
+                alUsoPromo.flush()
                 os.system("cls")
                 print("Promocion solicitada")
                 msvcrt.getch()
@@ -477,7 +479,7 @@ def promos_logged():
         if attr_comparar == user.codUsuario and aux_local.estado == 'A': 
             while afpromo.tell() <tam_promo:
                 aux_promo = pickle.load(alpromo)
-                if aux_local.codLocal == aux_promo.codLocal and  aux_promo.estado == "aprobada" and aux_promo.fechaDesdePromo <= hoy and hoy <= aux_promo.fechaHastaPromo:      
+                if aux_local.codLocal == aux_promo.codLocal and  aux_promo.estado.strip() == "aprobada" and aux_promo.fechaDesdePromo <= hoy and hoy <= aux_promo.fechaHastaPromo:      
                     print("Promocion Nro ",aux_promo.codPromo)
                     print(f"\nLocal:\n{aux_promo.codLocal} {aux_local.nombreLocal}")
                     
@@ -500,7 +502,7 @@ def promos_logged():
                     
                     print ("dias habiles: ",end="")
                     for i in range(0,7):
-                        if aux_promo.diasSemana != 0:
+                        if int(aux_promo.diasSemana[i]) != 0:
                             print (f"{dias[i]}, ", end="")
                     cont +=1
                     msvcrt.getch()
@@ -549,10 +551,14 @@ def crear_descuento():
 
 def generar_codp():
     tam = os.path.getsize(afpromo)
+
     if tam > 0:
-        alpromo.seek(2,0)
+        alpromo.seek(0,0)
         filelf = PROMOCIONES()
-        r = filelf.codPromo
+        while alpromo.tell() < tam:
+            filelf = pickle.load(alpromo)
+        
+        r = int(filelf.codPromo)
 
         r = r+1
     else:
@@ -588,9 +594,9 @@ def verify_cl():  #cambiado
     aux = LOCALES()
     while q != False:
         os.system("cls")
-        cd = input('Ingrese el código del local al que desea aplicarle el descuento')
+        cd = input('Ingrese el código del local al que desea aplicarle el descuento: ')
         while validarEntero(cd):
-            cd = input('Ingrese el código del local al que desea aplicarle el descuento')
+            cd = input('Ingrese el código del local al que desea aplicarle el descuento: ')
         n = lookForLocals(cd, "codigoLocal")
         if n != -1:
             aflocales.seek(n,0)
@@ -648,15 +654,16 @@ def reporte_desc_owner():
     # arreglar para que funcione con la posicion
     hoy = datetime.date.today()
     fd = get_fecha()
-    while fd < hoy:
-        os.system("cls")
-        print('Ingrese la feha desde la que la promoción estará habilitada: ')
-        fd = get_fecha()
+    
+    os.system("cls")
+    print('Ingrese la feha desde la que la promoción estará habilitada: ')
+    fd = get_fecha()
     print('Ingrese la feha hasta la que la promoción estará habilitada: ')
     fh = get_fecha()
     while fh <= fd:
         print('Ingrese la feha hasta la que la promoción estará habilitada: ')
         fh = get_fecha()
+    os.system("cls")
     print('Reporte de uso de descuento: ')
     print('Fecha desde ', fd, end= '    ')
     print('Fecha hasta: ', fh)
@@ -665,20 +672,35 @@ def reporte_desc_owner():
    
     aflocales.seek(0,0)
     alpromo.seek(0,0)
+    alUsoPromo.seek(0,0)
     aux_local = LOCALES()
     aux_promo = PROMOCIONES()
+    aux_uso = USO_PROMOCIONES()
     tam_local = os.path.getsize(urllocales)
     tam_promo = os.path.getsize(afpromo)
-    hoy = datetime.date.today()
+    hoy = str(datetime.date.today())
     cont = 0
+    
+    tam_usos = os.path.getsize(afUsoPromo)
     while aflocales.tell() < tam_local:
         aux_local = pickle.load(aflocales)
         attr_comparar = aux_local.codUsuario.strip()
 
-        if attr_comparar == user.codUsuario and aux_local.estado == 'A': 
-            while afpromo.tell() <tam_promo:
+        if int(attr_comparar) == user.codUsuario and aux_local.estado == 'A':
+            alpromo.seek(0,0)
+            alUsoPromo.seek(0,0) 
+            while alpromo.tell() <tam_promo:
                 aux_promo = pickle.load(alpromo)
-                if aux_local.codLocal == aux_promo.codLocal and  aux_promo.estado == "aprobada" and aux_promo.fechaDesdePromo <= fd and fh <= aux_promo.fechaHastaPromo:      
+                
+                if int(aux_local.codLocal.strip()) == int(aux_promo.codLocal) and  aux_promo.estado.strip() == "aprobada":
+                    cont_usos = 0
+                    if tam_usos > 0:
+                        while alUsoPromo.tell() < tam_usos:
+                            aux_uso = pickle.load(alUsoPromo)
+                            if int(aux_uso.codPromo) == int(aux_promo.codPromo) and (str(fd) <= aux_uso.fechaUsoPromo <= str(fh)):
+                                cont_usos += 1
+                    
+                          
                     print("Promocion Nro ",aux_promo.codPromo)
                     print(f"\nLocal:\n{aux_promo.codLocal} {aux_local.nombreLocal}")
                     
@@ -701,8 +723,11 @@ def reporte_desc_owner():
                     
                     print ("dias habiles: ",end="")
                     for i in range(0,7):
-                        if aux_promo.diasSemana != 0:
+                        if int(aux_promo.diasSemana[i]) != 0:
                             print (f"{dias[i]}, ", end="")
+                    
+                    print(f"\nUsos: {cont_usos}\n\n")
+                    
                     cont +=1
                     msvcrt.getch()
     if cont == 0:
@@ -1458,8 +1483,8 @@ def aprobar_denegar_desc():
                                     
                         print ("dias habiles: ",end="")
                         for i in range(0,7):
-                            if aux.diasSemana == "1":
-                                print (f"{dias[i]}, ", end="")
+                            if int(aux.diasSemana[i]) == 1:
+                                print (f", {dias[i]}", end="")
                         msvcrt.getch()
                         pregunta = "Desea aceptar la solicitud?"
                         answer = ask_continue(pregunta)
@@ -1552,74 +1577,94 @@ def show_promos(tipo):
             
 
 def reporte_desc():
-    global afpromo, alpromo, aflocales, dias, alUsoPromo, afUsoPromo
-    answer = "s"
+    global alpromo,afpromo, aflocales, urllocales
+    # nombre = usr puede ser un error. corroborar cuando se testee
+     
+    # Busco el nombre y los indices de los locales del dueño logueado
+   
+    # arreglar para que funcione con la posicion
+    os.system("cls")
+    print('Ingrese la feha desde la que la promoción estará habilitada: ')
+    fd = get_fecha()
+    print('Ingrese la feha hasta la que la promoción estará habilitada: ')
+    fh = get_fecha()
+    while fh <= fd:
+        print('Ingrese la feha hasta la que la promoción estará habilitada: ')
+        fh = get_fecha()
+    os.system("cls")
+    print('Reporte de uso de descuento: ')
+    print('Fecha desde ', fd, end= '    ')
+    print('Fecha hasta: ', fh)
+    
+
+   
+    aflocales.seek(0,0)
+    alpromo.seek(0,0)
+    alUsoPromo.seek(0,0)
+    aux_local = LOCALES()
+    aux_promo = PROMOCIONES()
+    aux_uso = USO_PROMOCIONES()
+    tam_local = os.path.getsize(urllocales)
+    tam_promo = os.path.getsize(afpromo)
+    hoy = str(datetime.date.today())
     cont = 0
-    while answer != "n":
-        os.system('cls')
-        print("Buscando promociones desde ")
-        desde = get_fecha()
-        os.system('cls')
-        print(f"Buscando promociones desde: {desde} hasta ")
-        hasta = get_fecha()
-        if desde <= hasta:
-            os.system('cls')
-            print(f"Buscando promociones desde: {desde} hasta {hasta}\n")
-               
+    
+    tam_usos = os.path.getsize(afUsoPromo)
+    while aflocales.tell() < tam_local:
+        aux_local = pickle.load(aflocales)
+        
+
+        if  aux_local.estado == 'A':
             alpromo.seek(0,0)
-            tam = os.path.getsize(afpromo)
-            aux = PROMOCIONES()
-            aux_local = LOCALES()
-            aux_usos = USO_PROMOCIONES()
-         
-            while alpromo.tell() < tam:
-                aux = pickle.load(alpromo)
-                if aux.estado.strip() == "aprobada" and str(desde) >= aux.fechaDesdePromo and str(hasta) <= aux.fechaHastaPromo :
-                    pos = lookForLocals(aux.codLocal, "code")
-                    if pos != -1: 
-                        aflocales.seek(pos,0)
-                        aux_local = pickle.load(aflocales)        
-                        
-                        print("Promocion Nro. ",aux.codPromo)
-                        print(f"\nLocal:\n{aux.codLocal} {aux_local.nombreLocal}")
-                        
-                        print ("Desde                     ",end="")
-                        print ("Hasta                     ",end="") 
-                        print ("estado                    ") 
-                        
-                        spaces = " " * (25 - len(aux.fechaDesdePromo))
-                        print (str(aux.fechaDesdePromo),spaces, end="")
-                        
-                        spaces = " " * (25 - len(aux.fechaHastaPromo))
-                        print (aux.fechaHastaPromo,spaces, end="")
-                        
-                        spaces = " " * (25 - len(aux.estado))
-                        print (aux.estado.capitalize(),spaces)
-                        
-                        print ("Promocion: ")
-                        
-                        print (aux.textoPromo.capitalize())
-                        
-                        print ("dias habiles: ",end="")
-                        for i in range(0,7):
-                            if aux.diasSemana != "0":
-                                print (f"{dias[i]}, ", end="")
-                        usos = 0 
-                        tam_uso = os.path.getsize(aflocales)    
-                        alUsoPromo.seek(0,0)
-                        while alUsoPromo.tell() < tam_uso:
-                            aux_usos = pickle.load(alUsoPromo)
-                            if aux_usos.codPromo == aux.codPromo and (aux_usos.fechaUsoPromo >= desde and aux_usos.fechaUsoPromo <= hasta) :
-                                usos +=1
-                        
-                        print(f"Usos de la promo: {usos}")
-                                 
-                        cont += 1
-            if cont == 0:
-                os.system("cls")
-                ("----- No existen promociones activas en el rango de fecha -----")
-                msvcrt.getch()
-    answer = ask_continue("desea realizar otro reporte? ")
+            alUsoPromo.seek(0,0) 
+            while alpromo.tell() <tam_promo:
+                aux_promo = pickle.load(alpromo)
+                
+                if int(aux_local.codLocal.strip()) == int(aux_promo.codLocal) and  aux_promo.estado.strip() == "aprobada":
+                    cont_usos = 0
+                    if tam_usos > 0:
+                        while alUsoPromo.tell() < tam_usos:
+                            aux_uso = pickle.load(alUsoPromo)
+                            if int(aux_uso.codPromo) == int(aux_promo.codPromo) and (str(fd) <= aux_uso.fechaUsoPromo <= str(fh)):
+                                cont_usos += 1
+                    
+                          
+                    print("Promocion Nro ",aux_promo.codPromo)
+                    print(f"\nLocal:\n{aux_promo.codLocal} {aux_local.nombreLocal}")
+                    
+                    print ("Desde                     ",end="")
+                    print ("Hasta                     ",end="") 
+                    print ("estado                    ") 
+                    
+                    spaces = " " * (25 - len(str(aux_promo.fechaDesdePromo)))
+                    print (str(aux_promo.fechaDesdePromo),spaces, end="")
+                    
+                    spaces = " " * (25 - len(str(aux_promo.fechaHastaPromo)))
+                    print (aux_promo.fechaHastaPromo,spaces, end="")
+                    
+                    spaces = " " * (25 - len(aux_promo.estado))
+                    print (aux_promo.estado.capitalize(),spaces)
+                    
+                    print ("Promocion ")
+                    
+                    print (aux_promo.textoPromo.capitalize())
+                    
+                    print ("dias habiles: ",end="")
+                    for i in range(0,7):
+                        if int(aux_promo.diasSemana[i]) != 0:
+                            print (f"{dias[i]}, ", end="")
+                    
+                    print(f"\nUsos: {cont_usos}\n")
+                    
+                    print("----------------------------------------------------------")
+                    
+                    
+                    cont +=1
+                    msvcrt.getch()
+    if cont == 0:
+        print("--- NO exite ninguna promocion cargada ---")
+        msvcrt.getch()
+    return 
         
             
                        
@@ -1794,7 +1839,7 @@ def formatear_promo(x):
     
     
 def formatear_uso_promo(x):
-        x.codCliente = str(x.codCliente).ljust(3, "")
+        x.codCliente = str(x.codCliente).ljust(3, " ")
         x.codPromo = str(x.codPromo).ljust(10," ")
         x.fechaUsoPromo = str(x.fechaUsoPromo).ljust(10," ")
 
